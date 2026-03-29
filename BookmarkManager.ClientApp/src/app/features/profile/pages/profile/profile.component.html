@@ -1,0 +1,164 @@
+<div class="profile-page">
+  <h1 class="page-title">Profile</h1>
+
+  <!-- Profile Info Card -->
+  <div class="card" *ngIf="profile">
+    <div class="card-header">
+      <div class="avatar-large">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <div class="user-meta">
+        <div class="user-name-row">
+          <h2 class="user-name">{{ profile.fullName }}</h2>
+          <button class="edit-icon" type="button" (click)="startEditName()" *ngIf="!isEditingName" title="Edit name">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </button>
+        </div>
+        <p class="user-email">{{ profile.email }}</p>
+
+        <!-- Inline edit name -->
+        <div class="edit-name-row" *ngIf="isEditingName">
+          <input class="edit-name-input" [(ngModel)]="editName" placeholder="Full name"
+            (keydown.enter)="onSaveName()" (keydown.escape)="cancelEditName()" autofocus />
+          <button class="edit-confirm-btn" type="button" (click)="onSaveName()" [disabled]="!editName.trim()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+          <button class="edit-cancel-btn" type="button" (click)="cancelEditName()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <span class="success-msg" *ngIf="profileMessage">{{ profileMessage }}</span>
+        <span class="error-msg" *ngIf="profileError">{{ profileError }}</span>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Username</span>
+        <span class="info-value">{{ profile.userName }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ profile.email }}</span>
+      </div>
+    </div>
+
+    <div class="card-footer-actions">
+      <button class="btn-secondary" type="button" (click)="openPasswordModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Change Password
+      </button>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-backdrop" *ngIf="showPasswordModal" (click)="closePasswordModal()"></div>
+  <div class="modal-panel" *ngIf="showPasswordModal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <button class="close-btn" type="button" (click)="closePasswordModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <h2 class="modal-title">Change Password</h2>
+    </div>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+      <div class="form-group">
+        <label for="currentPassword">Current Password</label>
+        <div class="input-wrapper">
+          <input id="currentPassword" [type]="showCurrentPassword ? 'text' : 'password'"
+            formControlName="currentPassword" placeholder="Enter current password">
+          <button type="button" class="toggle-pw" (click)="toggleField('current')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path *ngIf="!showCurrentPassword" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle *ngIf="!showCurrentPassword" cx="12" cy="12" r="3" />
+              <ng-container *ngIf="showCurrentPassword">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </ng-container>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="newPassword">New Password</label>
+        <div class="input-wrapper">
+          <input id="newPassword" [type]="showNewPassword ? 'text' : 'password'" formControlName="newPassword"
+            placeholder="Enter new password">
+          <button type="button" class="toggle-pw" (click)="toggleField('new')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path *ngIf="!showNewPassword" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle *ngIf="!showNewPassword" cx="12" cy="12" r="3" />
+              <ng-container *ngIf="showNewPassword">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </ng-container>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm New Password</label>
+        <div class="input-wrapper">
+          <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"
+            formControlName="confirmPassword" placeholder="Confirm new password">
+          <button type="button" class="toggle-pw" (click)="toggleField('confirm')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path *ngIf="!showConfirmPassword" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle *ngIf="!showConfirmPassword" cx="12" cy="12" r="3" />
+              <ng-container *ngIf="showConfirmPassword">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </ng-container>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <div class="modal-messages">
+          <span class="success-msg" *ngIf="passwordMessage">{{ passwordMessage }}</span>
+          <span class="error-msg" *ngIf="passwordError">{{ passwordError }}</span>
+        </div>
+        <button type="submit" class="btn-primary" [disabled]="passwordForm.invalid">Change Password</button>
+      </div>
+    </form>
+  </div>
+</div>

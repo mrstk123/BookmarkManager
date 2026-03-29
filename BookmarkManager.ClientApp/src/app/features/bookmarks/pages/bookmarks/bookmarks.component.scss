@@ -1,0 +1,30 @@
+.page-layout {
+  padding: 0;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.page-title {
+  font-size: var(--font-size-page-title);
+  margin: 0;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,35 @@
+import { TestBed } from '@angular/core/testing';
+import { App } from './app';
+
+describe('App', () => {
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [App],
+        }).compileComponents();
+    });
+
+    it('should create the app', () => {
+        const fixture = TestBed.createComponent(App);
+        const app = fixture.componentInstance;
+        expect(app).toBeTruthy();
+    });
+
+    it('should render title', async () => {
+        const fixture = TestBed.createComponent(App);
+        await fixture.whenStable();
+        const compiled = fixture.nativeElement as HTMLElement;
+        expect(compiled.querySelector('h1')?.textContent).toContain('Hello, BookmarkManager.ClientApp');
+    });
+});
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+@Component({
+    selector: 'app-root',
+    imports: [RouterOutlet],
+    templateUrl: './app.html',
+    styleUrl: './app.scss'
+})
+export class App {
+    protected readonly title = signal('BookmarkManager.ClientApp');
+}

@@ -1,0 +1,10 @@
+<div class="page-layout">
+  <app-bookmarks-view
+    [bookmarks]="(filteredBookmarks$ | async) || []"
+    [showNewButton]="true"
+    [pageTitle]="'All Bookmarks'"
+    (delete)="onDelete($event)"
+    (toggleFavorite)="onToggleFavorite($event)"
+    (created)="onCreated()">
+  </app-bookmarks-view>
+</div>

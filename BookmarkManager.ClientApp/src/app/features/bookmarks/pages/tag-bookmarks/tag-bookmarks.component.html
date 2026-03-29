@@ -1,0 +1,6 @@
+<div class="page-layout">
+    <app-bookmarks-view [bookmarks]="(filteredBookmarks$ | async) || []" [showNewButton]="true"
+        [pageTitle]="'#' + ((route.paramMap | async)?.get('name') || '')" (delete)="onDelete($event)"
+        (toggleFavorite)="onToggleFavorite($event)" (created)="onCreated()">
+    </app-bookmarks-view>
+</div>

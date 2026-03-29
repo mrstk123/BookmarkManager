@@ -1,0 +1,61 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="header">
+      <div class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bookmark"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      </div>
+      <h2 class="title1">Create Account</h2>
+      <p class="sub1">Sign up to get started</p>
+    </div>
+
+    <form class="form" [formGroup]="registerFrom" (ngSubmit)="onSubmit()">
+      <div class="name-field">
+        <label class="e-lbl" for="fullName">Full Name</label>
+        <div class="e-input">
+          <input type="text" id="fullName" formControlName="fullName" placeholder="Enter your full name">
+        </div>
+      </div>
+
+      <div class="email-field">
+        <label class="e-lbl" for="email">Email Address</label>
+        <div class="e-input" [class.input-error]="emailErrors">
+          <input type="email" id="email" formControlName="email" placeholder="Enter your email">
+        </div>
+        <span class="field-error" *ngIf="emailErrors">{{ emailErrors }}</span>
+      </div>
+
+      <div class="pass-field">
+        <label class="p-lbl" for="password">Password</label>
+        <div class="p-input" style="position: relative;">
+          <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" placeholder="••••••••">
+          <button type="button" class="password-toggle" aria-label="Toggle password visibility" (click)="togglePassword()">
+            <ng-container *ngIf="!showPassword">
+              <!-- Eye icon -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </ng-container>
+            <ng-container *ngIf="showPassword">
+              <!-- Eye-off icon -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </ng-container>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="login-btn" [disabled]="!registerFrom.valid">
+        <span class="lb-txt">Sign Up</span>
+      </button>
+    </form>
+
+    <div class="footer">
+      <span class="f-txt1">Already have an account?</span>
+      <a class="f-txt2" routerLink="/sign-in">Log in</a>
+    </div>
+  </div>
+</div>

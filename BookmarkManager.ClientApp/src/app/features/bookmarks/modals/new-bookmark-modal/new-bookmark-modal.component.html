@@ -1,0 +1,110 @@
+<!-- Backdrop -->
+<div class="modal-backdrop" (click)="closeModal()"></div>
+
+<!-- Modal Panel -->
+<div class="modal-panel" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+        <h2 class="modal-title">{{ modalTitle }}</h2>
+        <button class="close-btn" type="button" (click)="closeModal()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="modal-form">
+        <!-- URL -->
+        <div class="field">
+            <label class="field-label">URL</label>
+            <div class="url-input-row">
+                <div class="favicon-preview" *ngIf="faviconUrl">
+                    <img [src]="faviconUrl" alt="" width="20" height="20" />
+                </div>
+                <input class="field-input" formControlName="url" placeholder="https://"
+                    (ngModelChange)="onUrlChange($event)" />
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div class="field">
+            <label class="field-label">TITLE</label>
+            <input class="field-input" formControlName="title" placeholder="Enter title or leave blank" />
+        </div>
+
+        <!-- Folder -->
+        <div class="field">
+            <label class="field-label">FOLDER</label>
+            <div class="field-select" (click)="toggleFolderDropdown()">
+                <span class="select-text" [class.placeholder]="!form.get('folder')?.value">
+                    {{ form.get('folder')?.value || 'Select folder...' }}
+                </span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+            <!-- Folder dropdown -->
+            <div class="dropdown" *ngIf="showFolderDropdown">
+                <div class="dropdown-item" *ngFor="let f of (folders$ | async)" (click)="selectFolder(f.name)">{{ f.name
+                    }}
+                </div>
+                <!-- Create new folder -->
+                <div class="dropdown-create" *ngIf="!isCreatingFolder">
+                    <div class="dropdown-item create-folder-trigger" (click)="startCreateFolder()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Create new folder
+                    </div>
+                </div>
+                <div class="dropdown-new-folder" *ngIf="isCreatingFolder">
+                    <input class="new-folder-input" [value]="newFolderName"
+                        (input)="newFolderName = $any($event.target).value" placeholder="Folder name..."
+                        (keydown.enter)="createFolder()" (keydown.escape)="cancelCreateFolder()" />
+                    <div class="new-folder-actions">
+                        <button type="button" class="new-folder-btn cancel"
+                            (click)="cancelCreateFolder()">Cancel</button>
+                        <button type="button" class="new-folder-btn confirm" (click)="createFolder()"
+                            [disabled]="!newFolderName.trim()">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="field">
+            <label class="field-label">TAGS</label>
+            <div class="tags-input-container">
+                <span class="tag-chip" *ngFor="let tag of tagsList; let i = index">
+                    #{{ tag }}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" (click)="removeTag(i)">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </span>
+                <input class="tag-input" placeholder="#add tag..." [value]="tagInputValue" (input)="onTagInput($event)"
+                    (keydown.enter)="addTag($event)" (keydown.comma)="addTag($event)"
+                    (blur)="showTagSuggestions = false" />
+            </div>
+            <div class="tag-suggestions" *ngIf="showTagSuggestions">
+                <div class="tag-suggestion-item" *ngFor="let tag of tagSuggestions"
+                    (mousedown)="selectTagSuggestion(tag)">
+                    #{{ tag }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions">
+            <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+            <button type="submit" class="btn-save" [disabled]="form.invalid">{{ submitLabel }}</button>
+        </div>
+    </form>
+</div>
