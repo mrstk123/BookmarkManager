@@ -17,6 +17,9 @@ import { BookmarksService } from '../../../../core/services/bookmarks.service';
 export class NewBookmarkModalComponent implements OnInit {
   /** Pass a bookmark to switch to Edit mode. Leave undefined for Create mode. */
   @Input() bookmark?: Bookmark;
+  @Input() defaultFolder?: string;
+  @Input() defaultTag?: string;
+  @Input() defaultFavorite = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() created = new EventEmitter<Bookmark>();
@@ -46,6 +49,7 @@ export class NewBookmarkModalComponent implements OnInit {
   tagSuggestions: string[] = [];
   showTagSuggestions = false;
   tagInputValue = '';
+  isFavorite = false;
 
   get isEditMode(): boolean {
     return !!this.bookmark;
@@ -67,7 +71,18 @@ export class NewBookmarkModalComponent implements OnInit {
         folder: this.bookmark.folderName,
       });
       this.tagsList = [...this.bookmark.tags];
+      this.isFavorite = this.bookmark.isFavorite;
       this.onUrlChange(this.bookmark.url ?? '');
+    } else {
+      if (this.defaultFolder) {
+        this.form.patchValue({ folder: this.defaultFolder });
+      }
+      if (this.defaultTag) {
+        this.tagsList = [this.defaultTag];
+      }
+      if (this.defaultFavorite) {
+        this.isFavorite = true;
+      }
     }
 
     this.loadFolders();
@@ -194,6 +209,7 @@ export class NewBookmarkModalComponent implements OnInit {
         folderName: v.folder,
         tags: this.tagsList,
         iconUrl,
+        isFavorite: this.isFavorite,
       };
 
       if (this.isEditMode && this.bookmark) {

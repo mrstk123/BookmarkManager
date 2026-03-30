@@ -1,6 +1,8 @@
 <div class="page-layout">
     <app-bookmarks-view [bookmarks]="(filteredBookmarks$ | async) || []" [showNewButton]="true"
-        [pageTitle]="'#' + ((route.paramMap | async)?.get('name') || '')" (delete)="onDelete($event)"
-        (toggleFavorite)="onToggleFavorite($event)" (created)="onCreated()">
+        [pageTitle]="'#' + ((route.paramMap | async)?.get('name') || '')"
+        [defaultTag]="(route.paramMap | async)?.get('name') || ''"
+        (delete)="onDelete($event)"
+        (toggledFavorite)="onToggledFavorite($event)" (created)="onCreated()">
     </app-bookmarks-view>
 </div>

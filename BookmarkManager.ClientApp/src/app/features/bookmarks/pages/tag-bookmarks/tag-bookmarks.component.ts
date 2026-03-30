@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, combineLatest, map, startWith, switchMap } from 'rxjs';
+import { Observable, Subject, combineLatest, map, startWith, switchMap, merge, scan } from 'rxjs';
 import { BookmarksService } from '../../../../core/services/bookmarks.service';
 import { TagService } from '../../../../core/services/tag.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -24,14 +24,26 @@ export class TagBookmarksComponent implements OnInit {
   private authService = inject(AuthService);
 
   filteredBookmarks$!: Observable<Bookmark[]>;
+  private toggledSubject = new Subject<Bookmark>();
 
   ngOnInit() {
+    const search$ = this.searchService.searchQuery$.pipe(startWith(''));
+
     this.filteredBookmarks$ = this.route.paramMap.pipe(
       switchMap(params => {
         const tagName = params.get('name') || '';
+        const bookmarks$ = this.bookmarksService.getBookmarksByTag(this.authService.getUserId(), tagName);
         return combineLatest([
-          this.bookmarksService.getBookmarksByTag(this.authService.getUserId(), tagName),
-          this.searchService.searchQuery$.pipe(startWith('')),
+          merge(
+            bookmarks$,
+            this.toggledSubject
+          ).pipe(
+            scan((current: Bookmark[], incoming) => {
+              if (Array.isArray(incoming)) return incoming;
+              return current.map(b => b.id === incoming.id ? incoming : b);
+            }, [] as Bookmark[])
+          ),
+          search$,
           this.tagService.tags$,
         ]).pipe(
           map(([bookmarks, query]) => {
@@ -48,13 +60,13 @@ export class TagBookmarksComponent implements OnInit {
     );
   }
 
+  onToggledFavorite(bookmark: Bookmark): void {
+    this.toggledSubject.next(bookmark);
+  }
+
   onDelete(id: number): void {
     this.bookmarksService.deleteBookmark(id).subscribe();
   }
 
   onCreated(): void { }
-
-  onToggleFavorite(id: number): void {
-    this.bookmarksService.toggleFavorite(id).subscribe();
-  }
 }

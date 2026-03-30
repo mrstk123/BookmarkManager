@@ -41,6 +41,9 @@
 <app-new-bookmark-modal
   *ngIf="showModal"
   [bookmark]="editingBookmark"
+  [defaultFolder]="editingBookmark ? undefined : defaultFolder"
+  [defaultTag]="editingBookmark ? undefined : defaultTag"
+  [defaultFavorite]="editingBookmark ? false : defaultFavorite"
   (close)="closeModal()"
   (created)="closeModal()">
 </app-new-bookmark-modal>

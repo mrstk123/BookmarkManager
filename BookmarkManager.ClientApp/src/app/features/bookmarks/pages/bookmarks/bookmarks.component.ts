@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, combineLatest, map, startWith } from 'rxjs';
+import { Observable, Subject, combineLatest, map, startWith, merge, scan } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SearchService } from '../../../../core/services/search.service';
 import { Bookmark } from '../../../../models/bookmark.model';
@@ -20,13 +20,23 @@ export class BookmarksComponent implements OnInit {
     private authService = inject(AuthService);
 
     filteredBookmarks$!: Observable<Bookmark[]>;
+    private toggledSubject = new Subject<Bookmark>();
 
     ngOnInit() {
         const bookmarks$ = this.bookmarksService.getBookmarks(this.authService.getUserId());
+        const search$ = this.searchService.searchQuery$.pipe(startWith(''));
 
         this.filteredBookmarks$ = combineLatest([
-            bookmarks$,
-            this.searchService.searchQuery$.pipe(startWith(''))
+            merge(
+                bookmarks$,
+                this.toggledSubject
+            ).pipe(
+                scan((current: Bookmark[], incoming) => {
+                    if (Array.isArray(incoming)) return incoming;
+                    return current.map(b => b.id === incoming.id ? incoming : b);
+                }, [] as Bookmark[])
+            ),
+            search$
         ]).pipe(
             map(([bookmarks, query]) => {
                 if (!query.trim()) return bookmarks;
@@ -41,15 +51,13 @@ export class BookmarksComponent implements OnInit {
         );
     }
 
+    onToggledFavorite(bookmark: Bookmark): void {
+        this.toggledSubject.next(bookmark);
+    }
+
     onDelete(id: number): void {
         this.bookmarksService.deleteBookmark(id).subscribe();
     }
 
-    onCreated(): void {
-        // Observable auto-updates via HTTP re-fetch
-    }
-
-    onToggleFavorite(id: number): void {
-        this.bookmarksService.toggleFavorite(id).subscribe();
-    }
+    onCreated(): void { }
 }

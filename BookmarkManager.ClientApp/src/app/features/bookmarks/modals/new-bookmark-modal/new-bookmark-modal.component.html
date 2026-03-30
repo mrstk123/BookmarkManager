@@ -101,6 +101,15 @@
             </div>
         </div>
 
+        <!-- Favorite -->
+        <div class="field favorite-field">
+            <label class="field-label">FAVORITE</label>
+            <label class="toggle-switch">
+                <input type="checkbox" [checked]="isFavorite" (change)="isFavorite = !isFavorite">
+                <span class="toggle-track" [class.active]="isFavorite"></span>
+            </label>
+        </div>
+
         <!-- Actions -->
         <div class="modal-actions">
             <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>

@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, combineLatest, map, startWith } from 'rxjs';
+import { Observable, combineLatest, map, startWith, Subject, switchMap } from 'rxjs';
 import { SearchService } from '../../../../core/services/search.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Bookmark } from '../../../../models/bookmark.model';
@@ -45,11 +45,9 @@ export class FavoritesComponent implements OnInit {
         this.bookmarksService.deleteBookmark(id).subscribe();
     }
 
-    onCreated(): void {
-        // Observable auto-updates via HTTP re-fetch
-    }
+    onCreated(): void { }
 
-    onToggleFavorite(id: number): void {
-        this.bookmarksService.toggleFavorite(id).subscribe();
+    onUnfavorited(bookmark: Bookmark): void {
+        this.bookmarksService.refresh();
     }
 }
