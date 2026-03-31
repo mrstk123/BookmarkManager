@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
-import { ApiService, UserProfile } from '../../../../core/services/api.service';
+import { ApiService } from '../../../../core/services/api.service';
+import { UserProfile } from '../../../../models/user-profile.model';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({

@@ -57,7 +57,7 @@
 
 <!-- GRID VIEW -->
 <div class="cards-grid" *ngIf="viewMode === 'grid'">
-  <div class="card-grid" *ngFor="let b of bookmarks">
+  <div class="card-grid" *ngFor="let b of bookmarks; trackBy: trackByBookmarkId">
     <div class="card-head">
       <div class="card-favicon" [style.background-color]="(b.color || '#8B5CF6') + '20'">
         <img *ngIf="getIconUrl(b)" [src]="getIconUrl(b)" alt="" width="16" height="16" class="favicon-img" />
@@ -108,7 +108,7 @@
 
 <!-- LIST VIEW -->
 <div class="list-grid" *ngIf="viewMode === 'list'">
-  <div class="row-item" *ngFor="let b of bookmarks">
+  <div class="row-item" *ngFor="let b of bookmarks; trackBy: trackByBookmarkId">
     <div class="row-favicon" [style.background-color]="(b.color || '#8B5CF6') + '20'">
       <img *ngIf="getIconUrl(b)" [src]="getIconUrl(b)" alt="" width="16" height="16" class="favicon-img" />
       <svg *ngIf="!getIconUrl(b)" width="16" height="16" viewBox="0 0 24 24" fill="none"

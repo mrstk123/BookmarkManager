@@ -19,6 +19,7 @@ export class TagService {
         const userId = this.authService.getUserId();
         this.http.get<Tag[]>(`${this.apiUrl}/user/${userId}`).subscribe({
             next: (tags) => this.tagsSubject.next(tags),
+            error: (err) => console.error('Failed to load tags', err),
         });
     }
 

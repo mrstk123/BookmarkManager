@@ -72,7 +72,6 @@ export class BookmarksService {
   }
 
   toggleFavorite(id: number): Observable<any> {
-    const userId = this.authService.getUserId();
-    return this.http.put(`${this.apiUrl}/toggle-favorite?id=${id}&userId=${userId}`, null);
+    return this.http.put(`${this.apiUrl}/${id}/toggle-favorite`, null);
   }
 }

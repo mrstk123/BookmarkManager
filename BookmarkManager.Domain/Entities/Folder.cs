@@ -10,7 +10,7 @@ public class Folder
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    // Navigation properties
-    public User User { get; set; } = null!;
-    public ICollection<Bookmark> Bookmarks { get; set; } = new List<Bookmark>();
+    // Navigation properties - Unused with Dapper
+    // public User User { get; set; } = null!;
+    // public ICollection<Bookmark> Bookmarks { get; set; } = new List<Bookmark>();
 }

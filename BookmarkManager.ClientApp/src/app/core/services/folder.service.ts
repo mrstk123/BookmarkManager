@@ -19,6 +19,7 @@ export class FolderService {
         const userId = this.authService.getUserId();
         this.http.get<Folder[]>(`${this.apiUrl}/user/${userId}`).subscribe({
             next: (folders) => this.foldersSubject.next(folders),
+            error: (err) => console.error('Failed to load folders', err),
         });
     }
 

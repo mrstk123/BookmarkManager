@@ -1,11 +1,16 @@
 using BookmarkManager.Application.DTOs;
+using BookmarkManager.Application.Exceptions;
 using BookmarkManager.Application.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
+using BookmarkManager.Application.Interfaces.Commands;
+using BookmarkManager.Application.Interfaces.Queries;
 using BookmarkManager.Domain.Entities;
+using BookmarkManager.Domain.Interfaces;
 
 namespace BookmarkManager.Application.Services;
 
+/// <summary>
+/// Service for managing bookmarks, coordinating between queries, commands, and domain services.
+/// </summary>
 public class BookmarkService : IBookmarkService
 {
     private readonly IBookmarkQueries _bookmarkQueries;
@@ -13,14 +18,22 @@ public class BookmarkService : IBookmarkService
     private readonly IFolderQueries _folderQueries;
     private readonly ITagQueries _tagQueries;
     private readonly ITagCommands _tagCommands;
+    private readonly IImportHashGenerator _importHashGenerator;
 
-    public BookmarkService(IBookmarkQueries bookmarkQueries, IBookmarkCommands bookmarkCommands, IFolderQueries folderQueries, ITagQueries tagQueries, ITagCommands tagCommands)
+    public BookmarkService(
+        IBookmarkQueries bookmarkQueries,
+        IBookmarkCommands bookmarkCommands,
+        IFolderQueries folderQueries,
+        ITagQueries tagQueries,
+        ITagCommands tagCommands,
+        IImportHashGenerator importHashGenerator)
     {
         _bookmarkQueries = bookmarkQueries;
         _bookmarkCommands = bookmarkCommands;
         _folderQueries = folderQueries;
         _tagQueries = tagQueries;
         _tagCommands = tagCommands;
+        _importHashGenerator = importHashGenerator;
     }
 
     public async Task<BookmarkDto?> GetBookmarkByIdAsync(int id)
@@ -65,7 +78,7 @@ public class BookmarkService : IBookmarkService
             FolderId = folderId,
             IsFavorite = request.IsFavorite,
             IconUrl = request.IconUrl,
-            ImportHash = GenerateImportHash(request.Url),
+            ImportHash = _importHashGenerator.Generate(request.Url),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -73,41 +86,7 @@ public class BookmarkService : IBookmarkService
         var id = await _bookmarkCommands.AddAsync(bookmark);
         bookmark.Id = id;
 
-        var linkedTags = new List<string>();
-        if (request.Tags != null && request.Tags.Any())
-        {
-            var tagIdsToLink = new List<int>();
-            foreach (var tagName in request.Tags)
-            {
-                var tn = tagName.Trim();
-                if (string.IsNullOrWhiteSpace(tn)) continue;
-
-                var existingTag = await _tagQueries.GetByNameAsync(request.UserId, tn);
-                if (existingTag != null)
-                {
-                    tagIdsToLink.Add(existingTag.Id);
-                    linkedTags.Add(existingTag.Name);
-                }
-                else
-                {
-                    var newTag = new Tag
-                    {
-                        UserId = request.UserId,
-                        Name = tn,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    var tagId = await _tagCommands.AddAsync(newTag);
-                    tagIdsToLink.Add(tagId);
-                    linkedTags.Add(tn);
-                }
-            }
-
-            if (tagIdsToLink.Any())
-            {
-                await _bookmarkCommands.UpdateTagsAsync(bookmark.Id, tagIdsToLink);
-            }
-        }
+        var linkedTags = await ProcessTagsAsync(request.Tags, request.UserId, bookmark.Id);
 
         return new BookmarkDto
         {
@@ -129,7 +108,7 @@ public class BookmarkService : IBookmarkService
     public async Task<BookmarkDto> UpdateAsync(int id, UpdateBookmarkRequest request)
     {
         var existing = await _bookmarkQueries.GetByIdAsync(id);
-        if (existing == null) throw new Exception("Bookmark not found");
+        if (existing == null) throw new InvalidOperationException("Bookmark not found");
 
         int? folderId = null;
         if (!string.IsNullOrWhiteSpace(request.FolderName))
@@ -146,43 +125,13 @@ public class BookmarkService : IBookmarkService
             FolderId = folderId,
             IsFavorite = request.IsFavorite,
             IconUrl = request.IconUrl,
-            ImportHash = GenerateImportHash(request.Url),
+            ImportHash = _importHashGenerator.Generate(request.Url),
             UpdatedAt = DateTime.UtcNow
         };
 
         await _bookmarkCommands.UpdateAsync(bookmark);
 
-        var linkedTags = new List<string>();
-        if (request.Tags != null)
-        {
-            var tagIdsToLink = new List<int>();
-            foreach (var tagName in request.Tags)
-            {
-                var tn = tagName.Trim();
-                if (string.IsNullOrWhiteSpace(tn)) continue;
-
-                var existingTag = await _tagQueries.GetByNameAsync(existing.UserId, tn);
-                if (existingTag != null)
-                {
-                    tagIdsToLink.Add(existingTag.Id);
-                    linkedTags.Add(existingTag.Name);
-                }
-                else
-                {
-                    var newTag = new Tag
-                    {
-                        UserId = existing.UserId,
-                        Name = tn,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    var tagId = await _tagCommands.AddAsync(newTag);
-                    tagIdsToLink.Add(tagId);
-                    linkedTags.Add(tn);
-                }
-            }
-            await _bookmarkCommands.UpdateTagsAsync(id, tagIdsToLink);
-        }
+        var linkedTags = await ProcessTagsAsync(request.Tags, existing.UserId, id);
 
         return new BookmarkDto
         {
@@ -198,21 +147,47 @@ public class BookmarkService : IBookmarkService
         };
     }
 
-    private static string GenerateImportHash(string url)
+    /// <summary>
+    /// Processes tag names: finds existing or creates new tags, then links them to the bookmark.
+    /// </summary>
+    private async Task<List<string>> ProcessTagsAsync(List<string> tagNames, int userId, int bookmarkId)
     {
-        if (string.IsNullOrWhiteSpace(url)) return string.Empty;
+        var linkedTags = new List<string>();
+        if (tagNames == null || !tagNames.Any()) return linkedTags;
 
-        using var sha256 = SHA256.Create();
-        var bytes = Encoding.UTF8.GetBytes(url.Trim().ToLowerInvariant());
-        var hashBytes = sha256.ComputeHash(bytes);
-
-        var hashBuilder = new StringBuilder();
-        foreach (var b in hashBytes)
+        var tagIdsToLink = new List<int>();
+        foreach (var tagName in tagNames)
         {
-            hashBuilder.Append(b.ToString("x2"));
+            var trimmedName = tagName.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedName)) continue;
+
+            var existingTag = await _tagQueries.GetByNameAsync(userId, trimmedName);
+            if (existingTag != null)
+            {
+                tagIdsToLink.Add(existingTag.Id);
+                linkedTags.Add(existingTag.Name);
+            }
+            else
+            {
+                var newTag = new Tag
+                {
+                    UserId = userId,
+                    Name = trimmedName,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                var tagId = await _tagCommands.AddAsync(newTag);
+                tagIdsToLink.Add(tagId);
+                linkedTags.Add(trimmedName);
+            }
         }
 
-        return hashBuilder.ToString();
+        if (tagIdsToLink.Any())
+        {
+            await _bookmarkCommands.UpdateTagsAsync(bookmarkId, tagIdsToLink);
+        }
+
+        return linkedTags;
     }
 
     public async Task<int> DeleteAsync(int id)

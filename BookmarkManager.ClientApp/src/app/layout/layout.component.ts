@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { filter, debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../core/services/auth.service';
 import { FolderService } from '../core/services/folder.service';
 import { SearchService } from '../core/services/search.service';
@@ -11,13 +12,15 @@ import { TagService } from '../core/services/tag.service';
 import { Folder } from '../models/folder.model';
 import { Tag } from '../models/tag.model';
 
+const MOBILE_BREAKPOINT = 768;
+
 @Component({
     selector: 'app-layout',
     imports: [RouterModule, CommonModule, FormsModule],
     templateUrl: './layout.component.html',
-    styleUrl: './layout.component.scss',
+    styleUrls: ['./layout.component.scss'],
 })
-export class Layout implements OnInit {
+export class LayoutComponent implements OnInit {
     isSidebarClosed = false;
     isMobileSidebarOpen = false;
     pageTitle: string = 'Dashboard';
@@ -26,6 +29,7 @@ export class Layout implements OnInit {
     private tagService = inject(TagService);
     private searchService = inject(SearchService);
     private authService = inject(AuthService);
+    private destroyRef = inject(DestroyRef);
 
     folders: Folder[] = [];
     isCreatingFolder = false;
@@ -47,21 +51,26 @@ export class Layout implements OnInit {
 
     ngOnInit(): void {
         this.router.events
-            .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+            .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
             .subscribe((e: NavigationEnd) => {
                 this.setTitleFromUrl(e.urlAfterRedirects);
                 this.closeMobileSidebar();
             });
         this.setTitleFromUrl(this.router.url);
 
-        this.folderService.folders$.subscribe(folders => this.folders = folders);
-        this.tagService.tags$.subscribe(tags => this.tags = tags);
+        this.folderService.folders$
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(folders => this.folders = folders);
+        this.tagService.tags$
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe(tags => this.tags = tags);
         this.folderService.loadFolders();
         this.tagService.loadTags();
 
         this.searchSubject.pipe(
             debounceTime(300),
-            distinctUntilChanged()
+            distinctUntilChanged(),
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe(query => {
             this.searchService.setQuery(query);
         });
@@ -74,6 +83,14 @@ export class Layout implements OnInit {
     clearSearch(): void {
         this.searchQuery = '';
         this.searchSubject.next('');
+    }
+
+    trackByFolderId(index: number, folder: Folder): number {
+        return folder.id;
+    }
+
+    trackByTagId(index: number, tag: Tag): number {
+        return tag.id;
     }
 
     startCreateFolder(): void {
@@ -95,6 +112,7 @@ export class Layout implements OnInit {
                 this.isCreatingFolder = false;
                 this.newFolderName = '';
             },
+            error: (err) => console.error('Failed to create folder', err),
         });
     }
 
@@ -123,7 +141,8 @@ export class Layout implements OnInit {
                 if (oldName && this.router.url.startsWith(`/folder/${encodeURIComponent(oldName)}`)) {
                     this.router.navigate(['/folder', name]);
                 }
-            }
+            },
+            error: (err) => console.error('Failed to update folder', err),
         });
     }
 
@@ -140,7 +159,8 @@ export class Layout implements OnInit {
                 if (this.router.url.startsWith(`/folder/${encodeURIComponent(folder.name)}`)) {
                     this.router.navigate(['/bookmarks']);
                 }
-            }
+            },
+            error: (err) => console.error('Failed to delete folder', err),
         });
     }
 
@@ -163,6 +183,7 @@ export class Layout implements OnInit {
                 this.isCreatingTag = false;
                 this.newTagName = '';
             },
+            error: (err) => console.error('Failed to create tag', err),
         });
     }
 
@@ -191,7 +212,8 @@ export class Layout implements OnInit {
                 if (oldName && this.router.url.startsWith(`/tag/${encodeURIComponent(oldName)}`)) {
                     this.router.navigate(['/tag', name]);
                 }
-            }
+            },
+            error: (err) => console.error('Failed to update tag', err),
         });
     }
 
@@ -208,7 +230,8 @@ export class Layout implements OnInit {
                 if (this.router.url.startsWith(`/tag/${encodeURIComponent(tag.name)}`)) {
                     this.router.navigate(['/bookmarks']);
                 }
-            }
+            },
+            error: (err) => console.error('Failed to delete tag', err),
         });
     }
 
@@ -240,7 +263,7 @@ export class Layout implements OnInit {
     }
 
     toggleSidebar() {
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= MOBILE_BREAKPOINT) {
             this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
         } else {
             this.isSidebarClosed = !this.isSidebarClosed;

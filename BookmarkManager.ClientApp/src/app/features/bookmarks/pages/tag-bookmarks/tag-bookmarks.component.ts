@@ -2,12 +2,12 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject, combineLatest, map, startWith, switchMap, merge, scan } from 'rxjs';
-import { BookmarksService } from '../../../../core/services/bookmarks.service';
-import { TagService } from '../../../../core/services/tag.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { BookmarksService } from '../../../../core/services/bookmarks.service';
 import { SearchService } from '../../../../core/services/search.service';
 import { Bookmark } from '../../../../models/bookmark.model';
 import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-view/bookmarks-view.component';
+import { filterBookmarks } from '../../../../shared/utils/filter.utils';
 
 @Component({
   selector: 'app-tag-bookmarks',
@@ -19,7 +19,6 @@ import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-
 export class TagBookmarksComponent implements OnInit {
   route = inject(ActivatedRoute);
   private bookmarksService = inject(BookmarksService);
-  private tagService = inject(TagService);
   private searchService = inject(SearchService);
   private authService = inject(AuthService);
 
@@ -44,17 +43,8 @@ export class TagBookmarksComponent implements OnInit {
             }, [] as Bookmark[])
           ),
           search$,
-          this.tagService.tags$,
         ]).pipe(
-          map(([bookmarks, query]) => {
-            if (!query.trim()) return bookmarks;
-            const q = query.toLowerCase();
-            return bookmarks.filter(b =>
-              b.title.toLowerCase().includes(q) ||
-              b.url.toLowerCase().includes(q) ||
-              b.tags.some((t: any) => t.toLowerCase().includes(q))
-            );
-          })
+          map(([bookmarks, query]) => filterBookmarks(bookmarks, query))
         );
       })
     );
@@ -65,7 +55,9 @@ export class TagBookmarksComponent implements OnInit {
   }
 
   onDelete(id: number): void {
-    this.bookmarksService.deleteBookmark(id).subscribe();
+    this.bookmarksService.deleteBookmark(id).subscribe({
+      error: (err) => console.error('Failed to delete bookmark', err),
+    });
   }
 
   onCreated(): void { }

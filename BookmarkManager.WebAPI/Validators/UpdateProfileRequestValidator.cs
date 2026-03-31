@@ -1,0 +1,14 @@
+using BookmarkManager.Application.DTOs;
+using FluentValidation;
+
+namespace BookmarkManager.WebAPI.Validators;
+
+public class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequest>
+{
+    public UpdateProfileRequestValidator()
+    {
+        RuleFor(x => x.FullName)
+            .NotEmpty().WithMessage("Full name is required.")
+            .MaximumLength(100).WithMessage("Full name must not exceed 100 characters.");
+    }
+}

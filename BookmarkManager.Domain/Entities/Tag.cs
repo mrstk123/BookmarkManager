@@ -10,7 +10,7 @@ public class Tag
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    // Navigation Properties
-    public User User { get; set; } = null!;
-    public ICollection<BookmarkTag> BookmarkTags { get; set; } = new List<BookmarkTag>();
+    // Navigation Properties - Unused with Dapper
+    // public User User { get; set; } = null!;
+    // public ICollection<BookmarkTag> BookmarkTags { get; set; } = new List<BookmarkTag>();
 }

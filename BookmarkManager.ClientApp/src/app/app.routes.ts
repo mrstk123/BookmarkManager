@@ -1,42 +1,21 @@
 import { Routes } from '@angular/router';
-import { Component } from '@angular/core';
 import { authGuard } from './core/guards/auth-guard';
-import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
-import { LoginComponent } from './features/auth/login/login.component';
-import { RegisterComponent } from './features/auth/register/register.component';
-import { BookmarksComponent } from './features/bookmarks/pages/bookmarks/bookmarks.component';
-import { FavoritesComponent } from './features/bookmarks/pages/favorites/favorites.component';
-import { TagBookmarksComponent } from './features/bookmarks/pages/tag-bookmarks/tag-bookmarks.component';
-import { ProfileComponent } from './features/profile/pages/profile/profile.component';
-import { Layout } from './layout/layout.component';
-import { FolderBookmarksComponent } from './features/bookmarks/pages/folder-bookmarks/folder-bookmarks.component';
-
-@Component({
-  template: `<h2>{{title}}</h2>`,
-  standalone: true
-})
-export class DummyComponent {
-  title = 'Page Content Placeholder';
-}
 
 export const routes: Routes = [
   { path: '', redirectTo: 'bookmarks', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'sign-up', component: RegisterComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'login', loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent) },
+  { path: 'sign-up', loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent) },
+  { path: 'forgot-password', loadComponent: () => import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent) },
   {
     path: '',
-    component: Layout,
+    loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
     canActivate: [authGuard],
     children: [
-      { path: 'bookmarks', component: BookmarksComponent },
-      { path: 'favorites', component: FavoritesComponent },
-      { path: 'profile', component: ProfileComponent },
-      { path: 'folder/:name', component: FolderBookmarksComponent },
-      { path: 'tag/:name', component: TagBookmarksComponent },
-      { path: 'work', component: DummyComponent },
-      { path: 'design-inspiration', component: DummyComponent },
-      { path: 'tags', component: DummyComponent }
+      { path: 'bookmarks', loadComponent: () => import('./features/bookmarks/pages/bookmarks/bookmarks.component').then(m => m.BookmarksComponent) },
+      { path: 'favorites', loadComponent: () => import('./features/bookmarks/pages/favorites/favorites.component').then(m => m.FavoritesComponent) },
+      { path: 'profile', loadComponent: () => import('./features/profile/pages/profile/profile.component').then(m => m.ProfileComponent) },
+      { path: 'folder/:name', loadComponent: () => import('./features/bookmarks/pages/folder-bookmarks/folder-bookmarks.component').then(m => m.FolderBookmarksComponent) },
+      { path: 'tag/:name', loadComponent: () => import('./features/bookmarks/pages/tag-bookmarks/tag-bookmarks.component').then(m => m.TagBookmarksComponent) },
     ]
   },
 

@@ -64,7 +64,7 @@
                         </button>
                     </div>
                 </div>
-                <div *ngFor="let folder of folders" class="nav-item-sub-wrapper">
+                <div *ngFor="let folder of folders; trackBy: trackByFolderId" class="nav-item-sub-wrapper">
                     <!-- Inline edit folder -->
                     <div class="sidebar-edit-folder" *ngIf="editingFolderId === folder.id">
                         <input class="sidebar-folder-input" [(ngModel)]="editingFolderName" placeholder="Folder name..."
@@ -151,7 +151,7 @@
                         </button>
                     </div>
                 </div>
-                <div *ngFor="let tag of tags; let i = index" class="nav-item-sub-wrapper">
+                <div *ngFor="let tag of tags; let i = index; trackBy: trackByTagId" class="nav-item-sub-wrapper">
                     <!-- Inline edit tag -->
                     <div class="sidebar-edit-folder" *ngIf="editingTagId === tag.id">
                         <input class="sidebar-folder-input" [(ngModel)]="editingTagName" placeholder="Tag name..."

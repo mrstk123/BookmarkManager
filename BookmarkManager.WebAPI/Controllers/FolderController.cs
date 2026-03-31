@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BookmarkManager.WebAPI.Controllers;
 
-// [Authorize]
-[ApiController]
+[Authorize]
 [Route("api/[controller]")]
-public class FolderController : ControllerBase
+public class FolderController : ApiControllerBase
 {
     private readonly IFolderService _folderService;
 
@@ -17,38 +16,64 @@ public class FolderController : ControllerBase
         _folderService = folderService;
     }
 
-    [HttpGet("{id}")]
+    // GET /api/folder/{id}
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetFolder(int id)
     {
         var folder = await _folderService.GetFolderByIdAsync(id);
         if (folder == null) return NotFound();
+
+        var forbidden = EnforceOwnership(folder.UserId);
+        if (forbidden != null) return forbidden;
+
         return Ok(folder);
     }
 
-    [HttpGet("user/{userId}")]
+    // GET /api/folder/user/{userId}
+    [HttpGet("user/{userId:int}")]
     public async Task<IActionResult> GetFolders(int userId)
     {
-        var folders = await _folderService.GetFoldersByUserIdAsync(userId);
-        return Ok(folders);
+        var forbidden = EnforceOwnership(userId);
+        if (forbidden != null) return forbidden;
+
+        return Ok(await _folderService.GetFoldersByUserIdAsync(userId));
     }
 
+    // POST /api/folder
     [HttpPost]
     public async Task<IActionResult> AddFolder([FromBody] CreateFolderRequest request)
     {
+        // Override UserId from JWT to prevent ownership forgery
+        request.UserId = GetCurrentUserId();
+
         var folder = await _folderService.AddAsync(request);
         return CreatedAtAction(nameof(GetFolder), new { id = folder.Id }, folder);
     }
 
-    [HttpPut("{id}")]
+    // PUT /api/folder/{id}
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateFolder(int id, [FromBody] UpdateFolderRequest request)
     {
+        var existing = await _folderService.GetFolderByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        var forbidden = EnforceOwnership(existing.UserId);
+        if (forbidden != null) return forbidden;
+
         await _folderService.UpdateAsync(id, request);
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    // DELETE /api/folder/{id}
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteFolder(int id)
     {
+        var existing = await _folderService.GetFolderByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        var forbidden = EnforceOwnership(existing.UserId);
+        if (forbidden != null) return forbidden;
+
         await _folderService.DeleteAsync(id);
         return NoContent();
     }

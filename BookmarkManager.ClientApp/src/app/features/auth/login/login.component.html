@@ -12,7 +12,7 @@
       <p class="sub1">Log in to your account to continue</p>
     </div>
 
-    <form class="form" [formGroup]="loginFrom" (ngSubmit)="onSubmit()">
+    <form class="form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="email-field">
         <label class="e-lbl" for="email">Email Address</label>
         <div class="e-input">
@@ -51,7 +51,9 @@
         </div>
       </div>
 
-      <button type="submit" class="login-btn" [disabled]="!loginFrom.valid">
+      <div class="login-error" *ngIf="loginError">{{ loginError }}</div>
+
+      <button type="submit" class="login-btn" [disabled]="!loginForm.valid">
         <span class="lb-txt">Log In</span>
       </button>
     </form>

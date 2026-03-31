@@ -2,6 +2,9 @@ using System.Text;
 using BookmarkManager.Application;
 using BookmarkManager.Infrastructure;
 using BookmarkManager.Infrastructure.Authentication;
+using BookmarkManager.WebAPI.Middleware;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -10,6 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+
+// Register FluentValidation
+builder.Services.AddFluentValidationAutoValidation(config =>
+{
+    config.DisableDataAnnotationsValidation = true;
+});
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>();
 if (jwtSettings == null) throw new InvalidOperationException("JwtSettings is missing in configuration.");
@@ -39,6 +49,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseStaticFiles();
 }
+
+// Global exception handling middleware
+app.UseExceptionHandling();
 
 app.UseHttpsRedirection();
 

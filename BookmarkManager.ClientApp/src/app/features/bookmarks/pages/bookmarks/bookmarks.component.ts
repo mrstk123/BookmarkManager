@@ -6,6 +6,7 @@ import { SearchService } from '../../../../core/services/search.service';
 import { Bookmark } from '../../../../models/bookmark.model';
 import { BookmarksService } from '../../../../core/services/bookmarks.service';
 import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-view/bookmarks-view.component';
+import { filterBookmarks } from '../../../../shared/utils/filter.utils';
 
 @Component({
     selector: 'app-bookmarks-component',
@@ -38,16 +39,7 @@ export class BookmarksComponent implements OnInit {
             ),
             search$
         ]).pipe(
-            map(([bookmarks, query]) => {
-                if (!query.trim()) return bookmarks;
-                const q = query.toLowerCase();
-                return bookmarks.filter(b =>
-                    b.title.toLowerCase().includes(q) ||
-                    b.url.toLowerCase().includes(q) ||
-                    (b.folderName?.toLowerCase().includes(q)) ||
-                    b.tags.some((t: any) => t.toLowerCase().includes(q))
-                );
-            })
+            map(([bookmarks, query]) => filterBookmarks(bookmarks, query))
         );
     }
 
@@ -56,7 +48,9 @@ export class BookmarksComponent implements OnInit {
     }
 
     onDelete(id: number): void {
-        this.bookmarksService.deleteBookmark(id).subscribe();
+        this.bookmarksService.deleteBookmark(id).subscribe({
+            error: (err) => console.error('Failed to delete bookmark', err),
+        });
     }
 
     onCreated(): void { }

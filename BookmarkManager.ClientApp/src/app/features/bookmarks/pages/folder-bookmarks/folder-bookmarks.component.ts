@@ -4,10 +4,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject, combineLatest, map, startWith, switchMap, merge, scan } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { BookmarksService } from '../../../../core/services/bookmarks.service';
-import { FolderService } from '../../../../core/services/folder.service';
 import { SearchService } from '../../../../core/services/search.service';
 import { Bookmark } from '../../../../models/bookmark.model';
 import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-view/bookmarks-view.component';
+import { filterBookmarks } from '../../../../shared/utils/filter.utils';
 
 @Component({
   selector: 'app-folder-bookmarks',
@@ -19,7 +19,6 @@ import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-
 export class FolderBookmarksComponent implements OnInit {
   route = inject(ActivatedRoute);
   private bookmarksService = inject(BookmarksService);
-  private folderService = inject(FolderService);
   private searchService = inject(SearchService);
   private authService = inject(AuthService);
 
@@ -44,17 +43,8 @@ export class FolderBookmarksComponent implements OnInit {
             }, [] as Bookmark[])
           ),
           search$,
-          this.folderService.folders$,
         ]).pipe(
-          map(([bookmarks, query]) => {
-            if (!query.trim()) return bookmarks;
-            const q = query.toLowerCase();
-            return bookmarks.filter(b =>
-              b.title.toLowerCase().includes(q) ||
-              b.url.toLowerCase().includes(q) ||
-              b.tags.some((t: any) => t.toLowerCase().includes(q))
-            );
-          })
+          map(([bookmarks, query]) => filterBookmarks(bookmarks, query))
         );
       })
     );
@@ -65,7 +55,9 @@ export class FolderBookmarksComponent implements OnInit {
   }
 
   onDelete(id: number): void {
-    this.bookmarksService.deleteBookmark(id).subscribe();
+    this.bookmarksService.deleteBookmark(id).subscribe({
+      error: (err) => console.error('Failed to delete bookmark', err),
+    });
   }
 
   onCreated(): void { }

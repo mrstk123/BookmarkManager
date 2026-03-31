@@ -1,55 +1,70 @@
-using System;
-using System.Threading.Tasks;
 using BookmarkManager.Application.DTOs;
+using BookmarkManager.Application.Exceptions;
 using BookmarkManager.Application.Interfaces;
-using BookmarkManager.Domain.Entities;
+using BookmarkManager.Application.Interfaces.Commands;
+using BookmarkManager.Application.Interfaces.Queries;
 
 namespace BookmarkManager.Application.Services;
 
+/// <summary>
+/// Orchestrates all authentication and user-management business logic.
+/// This service owns: email uniqueness checks, password hashing/verification,
+/// and JWT generation. Infrastructure is only responsible for raw DB reads/writes.
+/// </summary>
 public class AuthService : IAuthService
 {
-    private readonly IUserQueries _userQueries;
-    private readonly IUserCommands _userCommands;
+    private readonly IAuthQueries _authQueries;
+    private readonly IAuthCommands _authCommands;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
     public AuthService(
-        IUserQueries userQueries, 
-        IUserCommands userCommands, 
-        IPasswordHasher passwordHasher, 
+        IAuthQueries authQueries,
+        IAuthCommands authCommands,
+        IPasswordHasher passwordHasher,
         IJwtTokenGenerator jwtTokenGenerator)
     {
-        _userQueries = userQueries;
-        _userCommands = userCommands;
+        _authQueries = authQueries;
+        _authCommands = authCommands;
         _passwordHasher = passwordHasher;
         _jwtTokenGenerator = jwtTokenGenerator;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
     {
-        // Check if user already exists
-        var existingUser = await _userQueries.GetByEmailAsync(request.Email);
-        if (existingUser != null)
-        {
-            throw new Exception("Email is already taken.");
-        }
+        // Business rule: email must be unique
+        var emailTaken = await _authQueries.EmailExistsAsync(request.Email);
+        if (emailTaken)
+            throw new DomainException("Email is already taken.");
 
-        // Hash password and create user
-        var hashedPassword = _passwordHasher.HashPassword(request.Password);
-        var user = new User
+        // Hash password before persisting
+        var passwordHash = _passwordHasher.HashPassword(request.Password);
+
+        // Delegate the raw insert to Infrastructure
+        var user = await _authCommands.CreateUserAsync(
+            request.UserName, request.FullName, request.Email, passwordHash);
+
+        // Generate JWT
+        var token = _jwtTokenGenerator.GenerateToken(user);
+
+        return new AuthResponseDto
         {
-            UserName = request.UserName,
-            FullName = request.FullName,
-            Email = request.Email,
-            PasswordHash = hashedPassword,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            Id = user.Id,
+            UserName = user.UserName,
+            FullName = user.FullName,
+            Email = user.Email,
+            Token = token
         };
+    }
 
-        var userId = await _userCommands.AddAsync(user);
-        user.Id = userId;
+    public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
+    {
+        var user = await _authQueries.GetUserByEmailAsync(request.Email);
 
-        // Generate Token
+        // Use a single generic error to prevent user enumeration
+        if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
+            throw new DomainException("Invalid credentials.");
+
         var token = _jwtTokenGenerator.GenerateToken(user);
 
         return new AuthResponseDto
@@ -64,84 +79,31 @@ public class AuthService : IAuthService
 
     public async Task<bool> CheckEmailAsync(string email)
     {
-        var existingUser = await _userQueries.GetByEmailAsync(email);
-        return existingUser != null;
+        return await _authQueries.EmailExistsAsync(email);
     }
 
     public async Task<UserDto> GetProfileAsync(int userId)
     {
-        var user = await _userQueries.GetByIdAsync(userId);
-        if (user == null)
-        {
-            throw new Exception("User not found.");
-        }
-        return user;
+        var user = await _authQueries.GetProfileAsync(userId);
+        return user ?? throw new KeyNotFoundException($"User {userId} not found.");
     }
 
     public async Task<UserDto> UpdateProfileAsync(int userId, UpdateProfileRequest request)
     {
-        var user = await _userQueries.GetUserEntityByIdAsync(userId);
-        if (user == null)
-        {
-            throw new Exception("User not found.");
-        }
-
-        user.FullName = request.FullName;
-        user.UpdatedAt = DateTime.UtcNow;
-        await _userCommands.UpdateAsync(user);
-
-        return new UserDto
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            FullName = user.FullName,
-            Email = user.Email,
-            CreatedAt = user.CreatedAt
-        };
+        return await _authCommands.UpdateProfileAsync(userId, request);
     }
 
     public async Task ChangePasswordAsync(int userId, ChangePasswordRequest request)
     {
-        var user = await _userQueries.GetUserEntityByIdAsync(userId);
-        if (user == null)
-        {
-            throw new Exception("User not found.");
-        }
+        // Business rule: verify current password before allowing change
+        var user = await _authQueries.GetUserByEmailAsync(
+            (await _authQueries.GetProfileAsync(userId))?.Email
+            ?? throw new KeyNotFoundException($"User {userId} not found."));
 
-        var isCurrentPasswordValid = _passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash);
-        if (!isCurrentPasswordValid)
-        {
-            throw new Exception("Current password is incorrect.");
-        }
+        if (user == null || !_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
+            throw new DomainException("Current password is incorrect.");
 
-        user.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
-        user.UpdatedAt = DateTime.UtcNow;
-        await _userCommands.UpdateAsync(user);
-    }
-
-    public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
-    {
-        var user = await _userQueries.GetUserEntityByEmailAsync(request.Email);
-        if (user == null)
-        {
-            throw new Exception("Invalid credentials.");
-        }
-
-        var isPasswordValid = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
-        if (!isPasswordValid)
-        {
-            throw new Exception("Invalid credentials.");
-        }
-
-        var token = _jwtTokenGenerator.GenerateToken(user);
-
-        return new AuthResponseDto
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            FullName = user.FullName,
-            Email = user.Email,
-            Token = token
-        };
+        var newHash = _passwordHasher.HashPassword(request.NewPassword);
+        await _authCommands.ChangePasswordAsync(userId, newHash);
     }
 }

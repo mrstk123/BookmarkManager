@@ -16,9 +16,9 @@ public class Bookmark
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    // Navigation Properties
-    protected User User { get; set; } = null!;
-    protected Folder? Folder { get; set; }
-    protected ICollection<BookmarkTag> BookmarkTags { get; set; } = new List<BookmarkTag>();
+    // Navigation Properties - Unused with Dapper
+    // protected User User { get; set; } = null!;
+    // protected Folder? Folder { get; set; }
+    // protected ICollection<BookmarkTag> BookmarkTags { get; set; } = new List<BookmarkTag>();
 
 }

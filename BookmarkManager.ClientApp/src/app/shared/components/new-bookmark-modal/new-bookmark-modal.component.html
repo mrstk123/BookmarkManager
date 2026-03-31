@@ -49,7 +49,7 @@
             </div>
             <!-- Folder dropdown -->
             <div class="dropdown" *ngIf="showFolderDropdown">
-                <div class="dropdown-item" *ngFor="let f of (folders$ | async)" (click)="selectFolder(f.name)">{{ f.name
+                <div class="dropdown-item" *ngFor="let f of (folders$ | async); trackBy: trackByFolderId" (click)="selectFolder(f.name)">{{ f.name
                     }}
                 </div>
                 <!-- Create new folder -->
@@ -81,7 +81,7 @@
         <div class="field">
             <label class="field-label">TAGS</label>
             <div class="tags-input-container">
-                <span class="tag-chip" *ngFor="let tag of tagsList; let i = index">
+                <span class="tag-chip" *ngFor="let tag of tagsList; let i = index; trackBy: trackByIndex">
                     #{{ tag }}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round" (click)="removeTag(i)">
@@ -94,7 +94,7 @@
                     (blur)="showTagSuggestions = false" />
             </div>
             <div class="tag-suggestions" *ngIf="showTagSuggestions">
-                <div class="tag-suggestion-item" *ngFor="let tag of tagSuggestions"
+                <div class="tag-suggestion-item" *ngFor="let tag of tagSuggestions; trackBy: trackByIndex"
                     (mousedown)="selectTagSuggestion(tag)">
                     #{{ tag }}
                 </div>

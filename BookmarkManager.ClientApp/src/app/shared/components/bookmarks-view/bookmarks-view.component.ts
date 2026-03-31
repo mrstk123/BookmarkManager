@@ -1,10 +1,12 @@
 import { Component, EventEmitter, Input, Output, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { DeleteBookmarkModalComponent } from '../../../features/bookmarks/modals/delete-bookmark-modal/delete-bookmark-modal.component';
-import { NewBookmarkModalComponent } from '../../../features/bookmarks/modals/new-bookmark-modal/new-bookmark-modal.component';
+import { StorageService } from '../../../core/services/storage.service';
+import { DeleteBookmarkModalComponent } from '../delete-bookmark-modal/delete-bookmark-modal.component';
+import { NewBookmarkModalComponent } from '../new-bookmark-modal/new-bookmark-modal.component';
 import { Bookmark } from '../../../models/bookmark.model';
 import { BookmarksService } from '../../../core/services/bookmarks.service';
+import { getFaviconUrl } from '../../utils/url.utils';
 
 const VIEW_MODE_KEY = 'bookmarks-view-mode';
 
@@ -17,6 +19,7 @@ const VIEW_MODE_KEY = 'bookmarks-view-mode';
 })
 export class BookmarksViewComponent implements OnInit {
   private bookmarksService = inject(BookmarksService);
+  private storage = inject(StorageService);
 
   @Input() bookmarks: Bookmark[] = [];
   @Input() showNewButton = false;
@@ -39,15 +42,15 @@ export class BookmarksViewComponent implements OnInit {
   bookmarkToDelete?: Bookmark;
 
   ngOnInit(): void {
-    const saved = localStorage.getItem(VIEW_MODE_KEY);
-    if (saved === 'grid' || saved === 'list') {
-      this.viewMode = saved;
+    const savedMode = this.storage.getString(VIEW_MODE_KEY) as 'grid' | 'list' | null;
+    if (savedMode === 'grid' || savedMode === 'list') {
+      this.viewMode = savedMode;
     }
   }
 
   setViewMode(mode: 'grid' | 'list'): void {
     this.viewMode = mode;
-    localStorage.setItem(VIEW_MODE_KEY, mode);
+    this.storage.setString(VIEW_MODE_KEY, mode);
   }
 
   openModal(): void {
@@ -83,36 +86,33 @@ export class BookmarksViewComponent implements OnInit {
     }
   }
 
+  /**
+   * Toggles favorite and emits the updated bookmark.
+   * The parent component handles the actual array update via toggledFavorite event.
+   */
   onToggleFavorite(bookmark: Bookmark): void {
     this.bookmarksService.toggleFavorite(bookmark.id).subscribe({
       next: () => {
-        const updated = { ...bookmark, isFavorite: !bookmark.isFavorite };
-        const idx = this.bookmarks.indexOf(bookmark);
-        if (idx !== -1) {
-          this.bookmarks = [...this.bookmarks];
-          this.bookmarks[idx] = updated;
-        }
+        const updated: Bookmark = { ...bookmark, isFavorite: !bookmark.isFavorite };
+        // Let the parent handle the update - no direct DOM mutation
         this.toggledFavorite.emit(updated);
         if (!updated.isFavorite) {
           this.unfavorited.emit(updated);
         }
       },
+      error: (err) => console.error('Failed to toggle favorite', err),
     });
   }
 
   getIconUrl(b: Bookmark): string {
-    if (b.iconUrl) return b.iconUrl;
-    const domain = this.extractDomain(b.url);
-    return domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64` : '';
+    return b.iconUrl || getFaviconUrl(b.url);
   }
 
-  private extractDomain(url: string): string {
-    if (!url) return '';
-    try {
-      const u = url.startsWith('http') ? url : `https://${url}`;
-      return new URL(u).hostname;
-    } catch {
-      return '';
-    }
+  trackByBookmarkId(_index: number, b: Bookmark): number {
+    return b.id;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 }

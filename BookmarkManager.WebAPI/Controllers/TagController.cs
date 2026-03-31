@@ -5,10 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BookmarkManager.WebAPI.Controllers;
 
-// [Authorize]
-[ApiController]
+[Authorize]
 [Route("api/[controller]")]
-public class TagController : ControllerBase
+public class TagController : ApiControllerBase
 {
     private readonly ITagService _tagService;
 
@@ -17,38 +16,64 @@ public class TagController : ControllerBase
         _tagService = tagService;
     }
 
-    [HttpGet("{id}")]
+    // GET /api/tag/{id}
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetTag(int id)
     {
         var tag = await _tagService.GetTagByIdAsync(id);
         if (tag == null) return NotFound();
+
+        var forbidden = EnforceOwnership(tag.UserId);
+        if (forbidden != null) return forbidden;
+
         return Ok(tag);
     }
 
-    [HttpGet("user/{userId}")]
+    // GET /api/tag/user/{userId}
+    [HttpGet("user/{userId:int}")]
     public async Task<IActionResult> GetTags(int userId)
     {
-        var tags = await _tagService.GetTagsByUserIdAsync(userId);
-        return Ok(tags);
+        var forbidden = EnforceOwnership(userId);
+        if (forbidden != null) return forbidden;
+
+        return Ok(await _tagService.GetTagsByUserIdAsync(userId));
     }
 
+    // POST /api/tag
     [HttpPost]
     public async Task<IActionResult> AddTag([FromBody] CreateTagRequest request)
     {
+        // Override UserId from JWT to prevent ownership forgery
+        request.UserId = GetCurrentUserId();
+
         var tag = await _tagService.AddAsync(request);
         return CreatedAtAction(nameof(GetTag), new { id = tag.Id }, tag);
     }
 
-    [HttpPut("{id}")]
+    // PUT /api/tag/{id}
+    [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateTag(int id, [FromBody] UpdateTagRequest request)
     {
+        var existing = await _tagService.GetTagByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        var forbidden = EnforceOwnership(existing.UserId);
+        if (forbidden != null) return forbidden;
+
         await _tagService.UpdateAsync(id, request);
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
+    // DELETE /api/tag/{id}
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteTag(int id)
     {
+        var existing = await _tagService.GetTagByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        var forbidden = EnforceOwnership(existing.UserId);
+        if (forbidden != null) return forbidden;
+
         await _tagService.DeleteAsync(id);
         return NoContent();
     }

@@ -11,30 +11,33 @@ import { ForgotPasswordResponse } from '../../../models/forgot-password-response
     standalone: true,
     imports: [ReactiveFormsModule, CommonModule, RouterModule],
     templateUrl: './forgot-password.component.html',
-    styleUrl: './forgot-password.component.scss',
+    styleUrls: ['./forgot-password.component.scss'],
 })
 export class ForgotPasswordComponent {
     private formBuilder = inject(FormBuilder);
     private api = inject(ApiService);
     private router = inject(Router);
 
-    forgotFrom = this.formBuilder.group({
+    forgotForm = this.formBuilder.group({
         email: ['', [Validators.required, Validators.email]],
     });
 
+    forgotError = '';
+
     onSubmit() {
-        if (this.forgotFrom.valid) {
-            const data = this.forgotFrom.value as { email: string };
+        if (this.forgotForm.valid) {
+            this.forgotError = '';
+            const data = this.forgotForm.value as { email: string };
             this.api.forgotPassword(data).subscribe({
                 next: (res: ForgotPasswordResponse) => {
                     if (res && res.success) {
                         this.router.navigate(['/login']);
                     } else {
-                        console.error('Forgot password failed', res?.message);
+                        this.forgotError = res?.message || 'Request failed. Please try again.';
                     }
                 },
                 error: (err: any) => {
-                    console.error('Forgot password API error', err);
+                    this.forgotError = err.error?.message || 'Request failed. Please try again.';
                 }
             });
         }

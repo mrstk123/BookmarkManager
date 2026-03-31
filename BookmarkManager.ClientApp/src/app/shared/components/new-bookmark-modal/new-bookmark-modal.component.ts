@@ -1,11 +1,13 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
-import { AuthService } from '../../../../core/services/auth.service';
-import { FolderService } from '../../../../core/services/folder.service';
-import { TagService } from '../../../../core/services/tag.service';
-import { Bookmark } from '../../../../models/bookmark.model';
-import { BookmarksService } from '../../../../core/services/bookmarks.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../../core/services/auth.service';
+import { FolderService } from '../../../core/services/folder.service';
+import { TagService } from '../../../core/services/tag.service';
+import { Bookmark } from '../../../models/bookmark.model';
+import { BookmarksService } from '../../../core/services/bookmarks.service';
+import { getFaviconUrl } from '../../utils/url.utils';
 
 @Component({
   selector: 'app-new-bookmark-modal',
@@ -27,6 +29,7 @@ export class NewBookmarkModalComponent implements OnInit {
   private folderService = inject(FolderService);
   private tagService = inject(TagService);
   private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
   folders$ = this.folderService.folders$;
 
   private formBuilder = inject(FormBuilder);
@@ -94,27 +97,16 @@ export class NewBookmarkModalComponent implements OnInit {
   }
 
   loadExistingTags() {
-    this.tagService.tags$.subscribe({
-      next: (tags) => (this.existingTags = tags.map((t) => t.name)),
-    });
+    this.tagService.tags$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tags) => (this.existingTags = tags.map((t) => t.name)),
+      });
     this.tagService.loadTags();
   }
 
   onUrlChange(url: string): void {
-    const domain = this.extractDomain(url);
-    this.faviconUrl = domain
-      ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-      : '';
-  }
-
-  private extractDomain(url: string): string {
-    if (!url) return '';
-    try {
-      const u = url.startsWith('http') ? url : `https://${url}`;
-      return new URL(u).hostname;
-    } catch {
-      return '';
-    }
+    this.faviconUrl = getFaviconUrl(url);
   }
 
   onTagInput(event: Event): void {
@@ -193,16 +185,14 @@ export class NewBookmarkModalComponent implements OnInit {
         this.form.patchValue({ folder: folder.name });
         this.showFolderDropdown = false;
       },
+      error: (err) => console.error('Failed to create folder', err),
     });
   }
 
   submit(): void {
     if (this.form.valid) {
       const v = this.form.value as { url?: string; title: string; folder?: string };
-      const domain = this.extractDomain(v.url ?? '');
-      const iconUrl = domain
-        ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64`
-        : '';
+      const iconUrl = getFaviconUrl(v.url ?? '');
       const payload = {
         title: v.title,
         url: v.url ?? '',
@@ -215,16 +205,22 @@ export class NewBookmarkModalComponent implements OnInit {
       if (this.isEditMode && this.bookmark) {
         this.bookmarksService
           .updateBookmark(this.bookmark.id, payload)
-          .subscribe((bm) => {
-            this.created.emit(bm);
-            this.closeModal();
+          .subscribe({
+            next: (bm) => {
+              this.created.emit(bm);
+              this.closeModal();
+            },
+            error: (err) => console.error('Failed to update bookmark', err),
           });
       } else {
         this.bookmarksService
           .createBookmark(payload)
-          .subscribe((bm) => {
-            this.created.emit(bm);
-            this.closeModal();
+          .subscribe({
+            next: (bm) => {
+              this.created.emit(bm);
+              this.closeModal();
+            },
+            error: (err) => console.error('Failed to create bookmark', err),
           });
       }
     }
@@ -232,5 +228,13 @@ export class NewBookmarkModalComponent implements OnInit {
 
   closeModal(): void {
     this.close.emit();
+  }
+
+  trackByFolderId(index: number, folder: { id: number }): number {
+    return folder.id;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 }

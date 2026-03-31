@@ -3,7 +3,7 @@ using System.Data;
 using BookmarkManager.Infrastructure;
 using Dapper;
 using BookmarkManager.Domain.Entities;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Commands;
 using Npgsql;
 
 namespace BookmarkManager.Infrastructure.Commands;
