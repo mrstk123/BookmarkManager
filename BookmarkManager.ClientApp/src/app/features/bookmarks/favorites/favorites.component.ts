@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, combineLatest, map, startWith } from 'rxjs';
-import { SearchService } from '../../../../core/services/search.service';
-import { AuthService } from '../../../../core/services/auth.service';
-import { Bookmark } from '../../../../models/bookmark.model';
-import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-view/bookmarks-view.component';
-import { BookmarksService } from '../../../../core/services/bookmarks.service';
-import { filterBookmarks } from '../../../../shared/utils/filter.utils';
+import { SearchService } from '../../../core/services/search.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Bookmark } from '../../../models/bookmark.model';
+import { BookmarksViewComponent } from '../../../shared/components/bookmarks-view/bookmarks-view.component';
+import { BookmarksService } from '../../../core/services/bookmarks.service';
+import { filterBookmarks } from '../../../shared/utils/filter.utils';
 
 @Component({
     selector: 'app-favorites-component',
@@ -23,7 +23,8 @@ export class FavoritesComponent implements OnInit {
     filteredBookmarks$!: Observable<Bookmark[]>;
 
     ngOnInit() {
-        const bookmarks$ = this.bookmarksService.getFavorites(this.authService.getUserId());
+        const userId = this.authService.getUserId() ?? 0;
+        const bookmarks$ = this.bookmarksService.getFavorites(userId);
 
         this.filteredBookmarks$ = combineLatest([
             bookmarks$,

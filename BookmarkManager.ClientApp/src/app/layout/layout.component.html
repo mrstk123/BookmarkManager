@@ -5,10 +5,12 @@
     <!-- sidebar -->
     <aside class="sidebar" [class.closed]="isSidebarClosed" [class.mobile-open]="isMobileSidebarOpen">
         <div class="sidebar-header">
-            <svg *ngIf="!isSidebarClosed" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-            </svg>
+            <div class="sidebar-brand-icon" *ngIf="!isSidebarClosed">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
             <h1 *ngIf="!isSidebarClosed">Bookmarks</h1>
         </div>
         <nav class="sidebar-nav">
@@ -31,6 +33,7 @@
                 <span class="label" *ngIf="!isSidebarClosed">Favorites</span>
             </a>
 
+            <!-- FOLDERS SECTION -->
             <div class="folders-section" *ngIf="!isSidebarClosed">
                 <div class="section-title-row">
                     <span class="section-title">FOLDERS</span>
@@ -45,8 +48,8 @@
                 </div>
                 <!-- Inline create folder -->
                 <div class="sidebar-new-folder" *ngIf="isCreatingFolder">
-                    <input class="sidebar-folder-input" [(ngModel)]="newFolderName" placeholder="Folder name..."
-                        (keydown.enter)="createFolder()" (keydown.escape)="cancelCreateFolder()" autofocus />
+                    <input class="sidebar-folder-input" #folderInput [(ngModel)]="newFolderName" placeholder="Folder name..."
+                        (keydown.enter)="createFolder()" (keydown.escape)="cancelCreateFolder()" />
                     <div class="sidebar-folder-actions">
                         <button class="sidebar-folder-btn confirm" (click)="createFolder()"
                             [disabled]="!newFolderName.trim()">
@@ -67,8 +70,8 @@
                 <div *ngFor="let folder of folders; trackBy: trackByFolderId" class="nav-item-sub-wrapper">
                     <!-- Inline edit folder -->
                     <div class="sidebar-edit-folder" *ngIf="editingFolderId === folder.id">
-                        <input class="sidebar-folder-input" [(ngModel)]="editingFolderName" placeholder="Folder name..."
-                            (keydown.enter)="saveEditFolder()" (keydown.escape)="cancelEditFolder()" autofocus />
+                        <input class="sidebar-folder-input" #editFolderInput [(ngModel)]="editingFolderName" placeholder="Folder name..."
+                            (keydown.enter)="saveEditFolder()" (keydown.escape)="cancelEditFolder()" />
                         <div class="sidebar-folder-actions">
                             <button class="sidebar-folder-btn confirm" (click)="saveEditFolder()"
                                 [disabled]="!editingFolderName.trim()">
@@ -118,6 +121,7 @@
                 </div>
             </div>
 
+            <!-- TAGS SECTION -->
             <div class="tags-section" *ngIf="!isSidebarClosed">
                 <div class="section-title-row">
                     <span class="section-title">TAGS</span>
@@ -132,8 +136,8 @@
                 </div>
                 <!-- Inline create tag -->
                 <div class="sidebar-new-folder" *ngIf="isCreatingTag">
-                    <input class="sidebar-folder-input" [(ngModel)]="newTagName" placeholder="Tag name..."
-                        (keydown.enter)="createTag()" (keydown.escape)="cancelCreateTag()" autofocus />
+                    <input class="sidebar-folder-input" #tagInput [(ngModel)]="newTagName" placeholder="Tag name..."
+                        (keydown.enter)="createTag()" (keydown.escape)="cancelCreateTag()" />
                     <div class="sidebar-folder-actions">
                         <button class="sidebar-folder-btn confirm" (click)="createTag()"
                             [disabled]="!newTagName.trim()">
@@ -154,8 +158,8 @@
                 <div *ngFor="let tag of tags; let i = index; trackBy: trackByTagId" class="nav-item-sub-wrapper">
                     <!-- Inline edit tag -->
                     <div class="sidebar-edit-folder" *ngIf="editingTagId === tag.id">
-                        <input class="sidebar-folder-input" [(ngModel)]="editingTagName" placeholder="Tag name..."
-                            (keydown.enter)="saveEditTag()" (keydown.escape)="cancelEditTag()" autofocus />
+                        <input class="sidebar-folder-input" #editTagInput [(ngModel)]="editingTagName" placeholder="Tag name..."
+                            (keydown.enter)="saveEditTag()" (keydown.escape)="cancelEditTag()" />
                         <div class="sidebar-folder-actions">
                             <button class="sidebar-folder-btn confirm" (click)="saveEditTag()"
                                 [disabled]="!editingTagName.trim()">
@@ -281,13 +285,17 @@
                 </button>
             </div>
             <div class="header-actions">
-                <span class="settings-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                        </path>
-                    </svg></span>
+                <!-- Dark mode toggle -->
+                <button class="theme-toggle" (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg *ngIf="isDarkMode" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg *ngIf="!isDarkMode" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </button>
                 <a class="avatar" routerLink="/profile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>

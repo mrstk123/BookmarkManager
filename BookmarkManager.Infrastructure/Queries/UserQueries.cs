@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Queries;
 using Dapper;
-using BookmarkManager.Infrastructure;
 
 namespace BookmarkManager.Infrastructure.Queries;
 

@@ -1,6 +1,6 @@
 using BookmarkManager.Domain.Entities;
 
-namespace BookmarkManager.Application.Interfaces;
+namespace BookmarkManager.Application.Interfaces.Security;
 
 public interface IJwtTokenGenerator
 {

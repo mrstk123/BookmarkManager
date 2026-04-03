@@ -1,5 +1,5 @@
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -110,6 +110,20 @@ public class BookmarkController : ApiControllerBase
         if (forbidden != null) return forbidden;
 
         await _bookmarkService.ToggleFavoriteAsync(id, existing.UserId);
+        return NoContent();
+    }
+
+    // PUT /api/bookmark/{id}/visit
+    [HttpPut("{id:int}/visit")]
+    public async Task<IActionResult> RecordVisit(int id)
+    {
+        var existing = await _bookmarkService.GetBookmarkByIdAsync(id);
+        if (existing == null) return NotFound();
+
+        var forbidden = EnforceOwnership(existing.UserId);
+        if (forbidden != null) return forbidden;
+
+        await _bookmarkService.RecordVisitAsync(id);
         return NoContent();
     }
 }

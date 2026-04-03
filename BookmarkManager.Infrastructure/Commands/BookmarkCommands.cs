@@ -1,9 +1,6 @@
-using System.Threading.Tasks;
-using System.Data;
-using BookmarkManager.Infrastructure;
-using Dapper;
 using BookmarkManager.Domain.Entities;
 using BookmarkManager.Application.Interfaces.Commands;
+using Dapper;
 using Npgsql;
 
 namespace BookmarkManager.Infrastructure.Commands;
@@ -11,10 +8,12 @@ namespace BookmarkManager.Infrastructure.Commands;
 public class BookmarkCommands : IBookmarkCommands
 {
     private readonly IConnectionFactory _connectionFactory;
+    private readonly TimeProvider _timeProvider;
 
-    public BookmarkCommands(IConnectionFactory connectionFactory)
+    public BookmarkCommands(IConnectionFactory connectionFactory, TimeProvider timeProvider)
     {
         _connectionFactory = connectionFactory;
+        _timeProvider = timeProvider;
     }
 
     public async Task<int> AddAsync(Bookmark bookmark)
@@ -69,7 +68,7 @@ public class BookmarkCommands : IBookmarkCommands
         var sql = "UPDATE Bookmarks SET IsFavorite = NOT IsFavorite, UpdatedAt = @UpdatedAt WHERE Id = @Id AND UserId = @UserId";
         using var conn = _connectionFactory.CreateConnection();
         conn.Open();
-        return await conn.ExecuteAsync(sql, new { Id = id, UserId = userId, UpdatedAt = DateTime.UtcNow });
+        return await conn.ExecuteAsync(sql, new { Id = id, UserId = userId, UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime });
     }
 
     public async Task UpdateTagsAsync(int bookmarkId, IEnumerable<int> tagIds)
@@ -95,5 +94,13 @@ public class BookmarkCommands : IBookmarkCommands
             transaction.Rollback();
             throw;
         }
+    }
+
+    public async Task<int> RecordVisitAsync(int id)
+    {
+        var sql = "UPDATE Bookmarks SET LastVisitedAt = @LastVisitedAt WHERE Id = @Id";
+        using var conn = _connectionFactory.CreateConnection();
+        conn.Open();
+        return await conn.ExecuteAsync(sql, new { Id = id, LastVisitedAt = _timeProvider.GetUtcNow().UtcDateTime });
     }
 }

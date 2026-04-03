@@ -1,7 +1,6 @@
-using System.Threading.Tasks;
 using BookmarkManager.Application.DTOs;
 
-namespace BookmarkManager.Application.Interfaces;
+namespace BookmarkManager.Application.Interfaces.Services;
 
 public interface IAuthService
 {

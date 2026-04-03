@@ -1,7 +1,5 @@
-using System.Data;
-using System.Threading.Tasks;
-using BookmarkManager.Application.Interfaces;
 using BookmarkManager.Domain.Entities;
+using BookmarkManager.Application.Interfaces.Commands;
 using Dapper;
 using Npgsql;
 

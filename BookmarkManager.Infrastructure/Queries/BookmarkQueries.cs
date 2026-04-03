@@ -1,10 +1,7 @@
 using System.Data;
-using System.Linq;
-using BookmarkManager.Infrastructure;
 using Dapper;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Queries;
 using BookmarkManager.Application.DTOs;
-using Npgsql;
 
 namespace BookmarkManager.Infrastructure.Queries;
 

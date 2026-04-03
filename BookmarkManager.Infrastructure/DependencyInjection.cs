@@ -1,9 +1,8 @@
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Security;
 using BookmarkManager.Application.Interfaces.Commands;
 using BookmarkManager.Application.Interfaces.Queries;
 using BookmarkManager.Domain.Interfaces;
 using BookmarkManager.Infrastructure.Commands;
-using BookmarkManager.Infrastructure.Persistence;
 using BookmarkManager.Infrastructure.Queries;
 using BookmarkManager.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
@@ -17,9 +16,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Migrations
-        DatabaseSetup.RunMigrations(configuration);
-        
+        // Register TimeProvider for testable time access
+        services.AddSingleton(TimeProvider.System);
+
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();

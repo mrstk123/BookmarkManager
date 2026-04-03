@@ -1,61 +1,82 @@
-<div class="register-container">
-  <div class="register-card">
-    <div class="header">
-      <div class="icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bookmark"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+<div class="register-page">
+  <!-- Branded Left Panel -->
+  <div class="brand-panel">
+    <div class="brand-content">
+      <div class="brand-icon-group">
+        <svg class="brand-logo" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+        </svg>
       </div>
-      <h2 class="title1">Create Account</h2>
-      <p class="sub1">Sign up to get started</p>
+      <h1 class="brand-title">Bookmarks</h1>
+      <p class="brand-tagline">Start organizing your web, effortlessly.</p>
     </div>
+    <div class="floating-icon fi-1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+    <div class="floating-icon fi-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+    <div class="floating-icon fi-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></div>
+    <div class="floating-icon fi-4"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+  </div>
 
-    <form class="form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <div class="name-field">
-        <label class="e-lbl" for="fullName">Full Name</label>
-        <div class="e-input">
-          <input type="text" id="fullName" formControlName="fullName" placeholder="Enter your full name">
+  <!-- Register Form Panel -->
+  <div class="form-panel">
+    <div class="register-card">
+      <div class="header">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
         </div>
+        <h2 class="title1">Create Account</h2>
+        <p class="sub1">Sign up to get started</p>
       </div>
 
-      <div class="email-field">
-        <label class="e-lbl" for="email">Email Address</label>
-        <div class="e-input" [class.input-error]="emailErrors">
-          <input type="email" id="email" formControlName="email" placeholder="Enter your email">
+      <form class="form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="name-field">
+          <label class="e-lbl" for="fullName">Full Name</label>
+          <div class="e-input">
+            <input type="text" id="fullName" formControlName="fullName" placeholder="Enter your full name">
+          </div>
         </div>
-        <span class="field-error" *ngIf="emailErrors">{{ emailErrors }}</span>
-      </div>
 
-      <div class="pass-field">
-        <label class="p-lbl" for="password">Password</label>
-        <div class="p-input" style="position: relative;">
-          <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" placeholder="••••••••">
-          <button type="button" class="password-toggle" aria-label="Toggle password visibility" (click)="togglePassword()">
-            <ng-container *ngIf="!showPassword">
-              <!-- Eye icon -->
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </ng-container>
-            <ng-container *ngIf="showPassword">
-              <!-- Eye-off icon -->
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            </ng-container>
-          </button>
+        <div class="email-field">
+          <label class="e-lbl" for="email">Email Address</label>
+          <div class="e-input" [class.input-error]="emailErrors">
+            <input type="email" id="email" formControlName="email" placeholder="Enter your email">
+          </div>
+          <span class="field-error" *ngIf="emailErrors">{{ emailErrors }}</span>
         </div>
+
+        <div class="pass-field">
+          <label class="p-lbl" for="password">Password</label>
+          <div class="p-input" style="position: relative;">
+            <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password" placeholder="••••••••">
+            <button type="button" class="password-toggle" aria-label="Toggle password visibility" (click)="togglePassword()">
+              <ng-container *ngIf="!showPassword">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </ng-container>
+              <ng-container *ngIf="showPassword">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              </ng-container>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="login-btn" [disabled]="!registerForm.valid">
+          <span class="lb-txt">Sign Up</span>
+          <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </form>
+
+      <div class="footer">
+        <span class="f-txt1">Already have an account?</span>
+        <a class="f-txt2" routerLink="/login">Log in</a>
       </div>
-
-      <button type="submit" class="login-btn" [disabled]="!registerForm.valid">
-        <span class="lb-txt">Sign Up</span>
-      </button>
-    </form>
-
-    <div class="footer">
-      <span class="f-txt1">Already have an account?</span>
-      <a class="f-txt2" routerLink="/login">Log in</a>
     </div>
   </div>
 </div>

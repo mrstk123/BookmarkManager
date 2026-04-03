@@ -2,14 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, switchMap, tap } from 'rxjs';
 import { Bookmark } from '../../models/bookmark.model';
-import { AuthService } from './auth.service';
 import { FolderService } from './folder.service';
 import { TagService } from './tag.service';
 
 @Injectable({ providedIn: 'root' })
 export class BookmarksService {
   private http = inject(HttpClient);
-  private authService = inject(AuthService);
   private folderService = inject(FolderService);
   private tagService = inject(TagService);
   private apiUrl = '/api/Bookmark';
@@ -45,8 +43,7 @@ export class BookmarksService {
   }
 
   createBookmark(data: { title: string; url: string; folderName?: string; tags: string[]; iconUrl?: string; isFavorite?: boolean }): Observable<Bookmark> {
-    const payload = { ...data, userId: this.authService.getUserId() };
-    return this.http.post<Bookmark>(this.apiUrl, payload).pipe(
+    return this.http.post<Bookmark>(this.apiUrl, data).pipe(
       tap(() => {
         this.refresh();
         this.folderService.loadFolders();
@@ -73,5 +70,9 @@ export class BookmarksService {
 
   toggleFavorite(id: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/toggle-favorite`, null);
+  }
+
+  recordVisit(id: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/visit`, null);
   }
 }

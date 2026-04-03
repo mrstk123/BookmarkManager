@@ -1,7 +1,8 @@
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace BookmarkManager.WebAPI.Controllers;
 
@@ -24,7 +25,11 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Rate-limited to 5 requests per IP per minute (built-in ASP.NET Core policy).
+    /// </summary>
     [AllowAnonymous]
+    [EnableRateLimiting("check-email-policy")]
     [HttpGet("check-email")]
     public async Task<IActionResult> CheckEmail([FromQuery] string email)
     {

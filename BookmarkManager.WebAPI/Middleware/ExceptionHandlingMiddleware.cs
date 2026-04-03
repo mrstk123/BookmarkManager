@@ -33,8 +33,6 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
-
         var response = context.Response;
         response.ContentType = "application/json";
 
@@ -49,24 +47,28 @@ public class ExceptionHandlingMiddleware
         {
             // Intentional business-rule violations (DomainException) → 400
             case DomainException:
+                _logger.LogWarning("Domain rule violation: {Message}", exception.Message);
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
                 errorResponse.StatusCode = (int)HttpStatusCode.BadRequest;
                 errorResponse.Message = exception.Message;
                 break;
 
             case UnauthorizedAccessException:
+                _logger.LogWarning("Unauthorized access attempt.");
                 response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 errorResponse.StatusCode = (int)HttpStatusCode.Unauthorized;
                 errorResponse.Message = "Unauthorized access.";
                 break;
 
             case KeyNotFoundException:
+                _logger.LogWarning("Resource not found: {Message}", exception.Message);
                 response.StatusCode = (int)HttpStatusCode.NotFound;
                 errorResponse.StatusCode = (int)HttpStatusCode.NotFound;
                 errorResponse.Message = exception.Message;
                 break;
 
             case FluentValidation.ValidationException validationEx:
+                _logger.LogWarning("Validation failed: {Message}", exception.Message);
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
                 errorResponse.StatusCode = (int)HttpStatusCode.BadRequest;
                 errorResponse.Message = "Validation failed.";
@@ -77,6 +79,7 @@ public class ExceptionHandlingMiddleware
 
             // Anything else (including InvalidOperationException from the runtime) stays 500
             default:
+                _logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 break;
         }

@@ -24,14 +24,14 @@ public class ConnectionFactory : IConnectionFactory
         {
             var conn = _configuration.GetConnectionString("PostgresConnection");
             if (string.IsNullOrWhiteSpace(conn))
-                throw new Exception("Postgres connection string is missing");
+                throw new InvalidOperationException("Postgres connection string is missing in configuration.");
             return new NpgsqlConnection(conn);
         }
         else
         {
             var conn = _configuration.GetConnectionString("DefaultConnection");
             if (string.IsNullOrWhiteSpace(conn))
-                throw new Exception("SQL Server connection string is missing");
+                throw new InvalidOperationException("SQL Server connection string is missing in configuration.");
             return new SqlConnection(conn);
         }
     }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +23,7 @@ const MOBILE_BREAKPOINT = 768;
 export class LayoutComponent implements OnInit {
     isSidebarClosed = false;
     isMobileSidebarOpen = false;
+    isDarkMode = false;
     pageTitle: string = 'Dashboard';
     private router = inject(Router);
     private folderService = inject(FolderService);
@@ -30,6 +31,7 @@ export class LayoutComponent implements OnInit {
     private searchService = inject(SearchService);
     private authService = inject(AuthService);
     private destroyRef = inject(DestroyRef);
+    private cdr = inject(ChangeDetectorRef);
 
     folders: Folder[] = [];
     isCreatingFolder = false;
@@ -46,24 +48,35 @@ export class LayoutComponent implements OnInit {
     deleteConfirmFolder: Folder | null = null;
     deleteConfirmTag: Tag | null = null;
 
+    @ViewChild('folderInput') folderInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('tagInput') tagInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('editFolderInput') editFolderInput!: ElementRef<HTMLInputElement>;
+    @ViewChild('editTagInput') editTagInput!: ElementRef<HTMLInputElement>;
+
     searchQuery = '';
     private searchSubject = new Subject<string>();
 
     ngOnInit(): void {
+        // Initialize dark mode from saved preference
+        const savedTheme = localStorage.getItem('theme');
+        this.isDarkMode = savedTheme === 'dark';
+        document.documentElement.setAttribute('data-theme', this.isDarkMode ? 'dark' : 'light');
+
         this.router.events
             .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
             .subscribe((e: NavigationEnd) => {
                 this.setTitleFromUrl(e.urlAfterRedirects);
                 this.closeMobileSidebar();
+                this.cdr.markForCheck();
             });
         this.setTitleFromUrl(this.router.url);
 
         this.folderService.folders$
             .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(folders => this.folders = folders);
+            .subscribe(folders => { this.folders = folders; this.cdr.markForCheck(); });
         this.tagService.tags$
             .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe(tags => this.tags = tags);
+            .subscribe(tags => { this.tags = tags; this.cdr.markForCheck(); });
         this.folderService.loadFolders();
         this.tagService.loadTags();
 
@@ -96,6 +109,7 @@ export class LayoutComponent implements OnInit {
     startCreateFolder(): void {
         this.isCreatingFolder = true;
         this.newFolderName = '';
+        setTimeout(() => this.folderInput?.nativeElement.focus());
     }
 
     cancelCreateFolder(): void {
@@ -107,10 +121,11 @@ export class LayoutComponent implements OnInit {
         const name = this.newFolderName.trim();
         if (!name) return;
 
-        this.folderService.createFolder({ name, userId: this.authService.getUserId() }).subscribe({
+        this.folderService.createFolder({ name }).subscribe({
             next: () => {
                 this.isCreatingFolder = false;
                 this.newFolderName = '';
+                this.cdr.markForCheck();
             },
             error: (err) => console.error('Failed to create folder', err),
         });
@@ -119,6 +134,7 @@ export class LayoutComponent implements OnInit {
     startEditFolder(folder: Folder): void {
         this.editingFolderId = folder.id;
         this.editingFolderName = folder.name;
+        setTimeout(() => this.editFolderInput?.nativeElement.focus());
     }
 
     cancelEditFolder(): void {
@@ -134,13 +150,14 @@ export class LayoutComponent implements OnInit {
         const folder = this.folders.find(f => f.id === this.editingFolderId);
         const oldName = folder?.name;
 
-        this.folderService.updateFolder(this.editingFolderId, { name, userId: this.authService.getUserId() }).subscribe({
+        this.folderService.updateFolder(this.editingFolderId, { name }).subscribe({
             next: () => {
                 this.editingFolderId = null;
                 this.editingFolderName = '';
                 if (oldName && this.router.url.startsWith(`/folder/${encodeURIComponent(oldName)}`)) {
                     this.router.navigate(['/folder', name]);
                 }
+                this.cdr.markForCheck();
             },
             error: (err) => console.error('Failed to update folder', err),
         });
@@ -159,6 +176,7 @@ export class LayoutComponent implements OnInit {
                 if (this.router.url.startsWith(`/folder/${encodeURIComponent(folder.name)}`)) {
                     this.router.navigate(['/bookmarks']);
                 }
+                this.cdr.markForCheck();
             },
             error: (err) => console.error('Failed to delete folder', err),
         });
@@ -167,6 +185,7 @@ export class LayoutComponent implements OnInit {
     startCreateTag(): void {
         this.isCreatingTag = true;
         this.newTagName = '';
+        setTimeout(() => this.tagInput?.nativeElement.focus());
     }
 
     cancelCreateTag(): void {
@@ -178,10 +197,11 @@ export class LayoutComponent implements OnInit {
         const name = this.newTagName.trim();
         if (!name) return;
 
-        this.tagService.createTag({ name, userId: this.authService.getUserId() }).subscribe({
+        this.tagService.createTag({ name }).subscribe({
             next: () => {
                 this.isCreatingTag = false;
                 this.newTagName = '';
+                this.cdr.markForCheck();
             },
             error: (err) => console.error('Failed to create tag', err),
         });
@@ -190,6 +210,7 @@ export class LayoutComponent implements OnInit {
     startEditTag(tag: Tag): void {
         this.editingTagId = tag.id;
         this.editingTagName = tag.name;
+        setTimeout(() => this.editTagInput?.nativeElement.focus());
     }
 
     cancelEditTag(): void {
@@ -205,13 +226,14 @@ export class LayoutComponent implements OnInit {
         const tag = this.tags.find(t => t.id === this.editingTagId);
         const oldName = tag?.name;
 
-        this.tagService.updateTag(this.editingTagId, { name, userId: this.authService.getUserId() }).subscribe({
+        this.tagService.updateTag(this.editingTagId, { name }).subscribe({
             next: () => {
                 this.editingTagId = null;
                 this.editingTagName = '';
                 if (oldName && this.router.url.startsWith(`/tag/${encodeURIComponent(oldName)}`)) {
                     this.router.navigate(['/tag', name]);
                 }
+                this.cdr.markForCheck();
             },
             error: (err) => console.error('Failed to update tag', err),
         });
@@ -230,6 +252,7 @@ export class LayoutComponent implements OnInit {
                 if (this.router.url.startsWith(`/tag/${encodeURIComponent(tag.name)}`)) {
                     this.router.navigate(['/bookmarks']);
                 }
+                this.cdr.markForCheck();
             },
             error: (err) => console.error('Failed to delete tag', err),
         });
@@ -276,6 +299,13 @@ export class LayoutComponent implements OnInit {
 
     closeMobileSidebar() {
         this.isMobileSidebarOpen = false;
+    }
+
+    toggleDarkMode(): void {
+        this.isDarkMode = !this.isDarkMode;
+        const theme = this.isDarkMode ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
     }
 
     logout() {

@@ -32,24 +32,15 @@ export class ApiService {
     return this.http.post('/api/Auth/forgot-password', data);
   }
 
-  getProfile(userId: number): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`/api/User/profile/${userId}`);
+  getProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>('/api/User/profile');
   }
 
-  updateProfile(
-    userId: number,
-    data: { fullName: string }
-  ): Observable<UserProfile> {
-    return this.http.put<UserProfile>(
-      `/api/User/profile/${userId}`,
-      data
-    );
+  updateProfile(data: { fullName: string }): Observable<UserProfile> {
+    return this.http.put<UserProfile>('/api/User/profile', data);
   }
 
-  changePassword(
-    userId: number,
-    data: { currentPassword: string; newPassword: string }
-  ): Observable<any> {
-    return this.http.put(`/api/User/password/${userId}`, data);
+  changePassword(data: { currentPassword: string; newPassword: string }): Observable<any> {
+    return this.http.put('/api/User/password', data);
   }
 }

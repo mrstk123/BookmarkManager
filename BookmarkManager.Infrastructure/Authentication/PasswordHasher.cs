@@ -1,4 +1,4 @@
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Security;
 using BC = BCrypt.Net.BCrypt;
 
 namespace BookmarkManager.Infrastructure.Authentication;

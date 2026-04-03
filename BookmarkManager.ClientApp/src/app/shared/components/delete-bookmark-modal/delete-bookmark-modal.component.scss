@@ -2,8 +2,11 @@
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.2);
-    z-index: 100;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: var(--z-modal-backdrop);
+    animation: backdropFadeIn 0.25s ease forwards;
 }
 
 // === Modal Panel ===
@@ -14,14 +17,16 @@
     transform: translate(-50%, -50%);
     width: 420px;
     max-width: 92vw;
-    background: var(--color-bg-primary);
-    border-radius: 32px;
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-2xl);
     padding: 32px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
-    z-index: 101;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--color-border-light);
+    z-index: var(--z-modal);
     display: flex;
     flex-direction: column;
     gap: 20px;
+    animation: slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 // === Header ===
@@ -33,9 +38,9 @@
     .icon-warning {
         width: 48px;
         height: 48px;
-        border-radius: 16px;
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444; // red
+        border-radius: var(--radius-lg);
+        background: rgba(239, 68, 68, 0.08);
+        color: var(--color-accent-red);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -51,14 +56,16 @@
         border: none;
         cursor: pointer;
         color: var(--color-text-tertiary);
-        padding: 4px;
+        padding: 6px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: color 0.15s;
+        border-radius: var(--radius-sm);
+        transition: color var(--transition-fast), background var(--transition-fast);
 
         &:hover {
             color: var(--color-text-primary);
+            background: var(--color-bg-secondary);
         }
     }
 }
@@ -71,7 +78,7 @@
 
     .modal-title {
         font-family: var(--font-display);
-        font-size: 24px;
+        font-size: 22px;
         font-weight: 800;
         color: var(--color-text-primary);
         margin: 0;
@@ -79,8 +86,8 @@
 
     .modal-desc {
         font-family: var(--font-sans);
-        font-size: 15px;
-        line-height: 1.5;
+        font-size: 14px;
+        line-height: 1.6;
         color: var(--color-text-secondary);
         margin: 0;
     }
@@ -91,21 +98,21 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 16px;
-    margin-top: 12px;
+    gap: 12px;
+    margin-top: 8px;
 }
 
 .btn-cancel {
     background: none;
     border: none;
-    padding: 12px 20px;
-    border-radius: 20px;
+    padding: 11px 20px;
+    border-radius: var(--radius-md);
     font-family: var(--font-sans);
     font-size: 14px;
     font-weight: 600;
     color: var(--color-text-secondary);
     cursor: pointer;
-    transition: color 0.15s, background 0.15s;
+    transition: color var(--transition-fast), background var(--transition-fast);
 
     &:hover {
         color: var(--color-text-primary);
@@ -114,19 +121,20 @@
 }
 
 .btn-delete {
-    background: #ef4444; // red
+    background: var(--color-accent-red);
     border: none;
-    padding: 12px 24px;
-    border-radius: 20px;
+    padding: 11px 24px;
+    border-radius: var(--radius-md);
     font-family: var(--font-sans);
     font-size: 14px;
     font-weight: 600;
     color: #fff;
     cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
+    transition: background 0.2s, box-shadow 0.2s, transform var(--transition-spring);
 
     &:hover {
-        background: #dc2626;
+        background: #DC2626;
+        box-shadow: var(--shadow-glow-danger);
         transform: translateY(-1px);
     }
 }

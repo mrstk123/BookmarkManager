@@ -1,5 +1,5 @@
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

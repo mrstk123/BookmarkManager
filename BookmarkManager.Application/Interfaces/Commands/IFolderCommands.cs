@@ -1,6 +1,6 @@
 using BookmarkManager.Domain.Entities;
 
-namespace BookmarkManager.Application.Interfaces;
+namespace BookmarkManager.Application.Interfaces.Commands;
 
 public interface IFolderCommands
 {

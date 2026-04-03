@@ -1,8 +1,8 @@
+using AutoMapper;
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Exceptions;
-using BookmarkManager.Application.Interfaces;
 using BookmarkManager.Application.Interfaces.Commands;
 using BookmarkManager.Application.Interfaces.Queries;
+using BookmarkManager.Application.Interfaces.Services;
 using BookmarkManager.Domain.Entities;
 using BookmarkManager.Domain.Interfaces;
 
@@ -19,6 +19,8 @@ public class BookmarkService : IBookmarkService
     private readonly ITagQueries _tagQueries;
     private readonly ITagCommands _tagCommands;
     private readonly IImportHashGenerator _importHashGenerator;
+    private readonly TimeProvider _timeProvider;
+    private readonly IMapper _mapper;
 
     public BookmarkService(
         IBookmarkQueries bookmarkQueries,
@@ -26,7 +28,9 @@ public class BookmarkService : IBookmarkService
         IFolderQueries folderQueries,
         ITagQueries tagQueries,
         ITagCommands tagCommands,
-        IImportHashGenerator importHashGenerator)
+        IImportHashGenerator importHashGenerator,
+        TimeProvider timeProvider,
+        IMapper mapper)
     {
         _bookmarkQueries = bookmarkQueries;
         _bookmarkCommands = bookmarkCommands;
@@ -34,6 +38,8 @@ public class BookmarkService : IBookmarkService
         _tagQueries = tagQueries;
         _tagCommands = tagCommands;
         _importHashGenerator = importHashGenerator;
+        _timeProvider = timeProvider;
+        _mapper = mapper;
     }
 
     public async Task<BookmarkDto?> GetBookmarkByIdAsync(int id)
@@ -70,6 +76,7 @@ public class BookmarkService : IBookmarkService
             folderId = folder?.Id;
         }
 
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         var bookmark = new Bookmark
         {
             UserId = request.UserId,
@@ -79,8 +86,8 @@ public class BookmarkService : IBookmarkService
             IsFavorite = request.IsFavorite,
             IconUrl = request.IconUrl,
             ImportHash = _importHashGenerator.Generate(request.Url),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         var id = await _bookmarkCommands.AddAsync(bookmark);
@@ -88,21 +95,11 @@ public class BookmarkService : IBookmarkService
 
         var linkedTags = await ProcessTagsAsync(request.Tags, request.UserId, bookmark.Id);
 
-        return new BookmarkDto
-        {
-            Id = bookmark.Id,
-            UserId = bookmark.UserId,
-            FolderId = bookmark.FolderId,
-            Title = bookmark.Title,
-            Url = bookmark.Url,
-            IconUrl = bookmark.IconUrl,
-            ImportHash = bookmark.ImportHash,
-            LastVisitedAt = bookmark.LastVisitedAt,
-            CreatedAt = bookmark.CreatedAt,
-            UpdatedAt = bookmark.UpdatedAt,
-            FolderName = request.FolderName,
-            Tags = linkedTags
-        };
+        var dto = _mapper.Map<BookmarkDto>(bookmark);
+        dto.FolderName = request.FolderName;
+        dto.Tags = linkedTags;
+
+        return dto;
     }
 
     public async Task<BookmarkDto> UpdateAsync(int id, UpdateBookmarkRequest request)
@@ -126,25 +123,18 @@ public class BookmarkService : IBookmarkService
             IsFavorite = request.IsFavorite,
             IconUrl = request.IconUrl,
             ImportHash = _importHashGenerator.Generate(request.Url),
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime
         };
 
         await _bookmarkCommands.UpdateAsync(bookmark);
 
         var linkedTags = await ProcessTagsAsync(request.Tags, existing.UserId, id);
 
-        return new BookmarkDto
-        {
-            Id = id,
-            FolderId = folderId,
-            Title = request.Title,
-            Url = request.Url,
-            IconUrl = request.IconUrl,
-            ImportHash = bookmark.ImportHash,
-            UpdatedAt = bookmark.UpdatedAt,
-            FolderName = request.FolderName,
-            Tags = linkedTags
-        };
+        var dto = _mapper.Map<BookmarkDto>(bookmark);
+        dto.FolderName = request.FolderName;
+        dto.Tags = linkedTags;
+
+        return dto;
     }
 
     /// <summary>
@@ -169,12 +159,13 @@ public class BookmarkService : IBookmarkService
             }
             else
             {
+                var now = _timeProvider.GetUtcNow().UtcDateTime;
                 var newTag = new Tag
                 {
                     UserId = userId,
                     Name = trimmedName,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = now,
+                    UpdatedAt = now
                 };
                 var tagId = await _tagCommands.AddAsync(newTag);
                 tagIdsToLink.Add(tagId);
@@ -198,5 +189,10 @@ public class BookmarkService : IBookmarkService
     public async Task<int> ToggleFavoriteAsync(int id, int userId)
     {
         return await _bookmarkCommands.ToggleFavoriteAsync(id, userId);
+    }
+
+    public async Task<int> RecordVisitAsync(int id)
+    {
+        return await _bookmarkCommands.RecordVisitAsync(id);
     }
 }

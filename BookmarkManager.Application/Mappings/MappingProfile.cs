@@ -11,13 +11,12 @@ public class MappingProfile : Profile
         // User Mappings
         CreateMap<User, UserDto>();
 
-
         // Folder Mappings
         CreateMap<Folder, FolderDto>();
 
-
         // Bookmark Mappings
-        CreateMap<Bookmark, BookmarkDto>();
-
+        CreateMap<Bookmark, BookmarkDto>()
+            .ForMember(dest => dest.Tags, opt => opt.Ignore())
+            .ForMember(dest => dest.FolderName, opt => opt.Ignore());
     }
 }

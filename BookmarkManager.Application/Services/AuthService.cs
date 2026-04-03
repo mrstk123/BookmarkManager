@@ -1,8 +1,9 @@
 using BookmarkManager.Application.DTOs;
 using BookmarkManager.Application.Exceptions;
-using BookmarkManager.Application.Interfaces;
 using BookmarkManager.Application.Interfaces.Commands;
 using BookmarkManager.Application.Interfaces.Queries;
+using BookmarkManager.Application.Interfaces.Security;
+using BookmarkManager.Application.Interfaces.Services;
 
 namespace BookmarkManager.Application.Services;
 
@@ -40,9 +41,14 @@ public class AuthService : IAuthService
         // Hash password before persisting
         var passwordHash = _passwordHasher.HashPassword(request.Password);
 
+        // Extract username from email (part before @) if no explicit username provided
+        var userName = string.IsNullOrWhiteSpace(request.UserName)
+            ? request.Email.Split('@')[0]
+            : request.UserName;
+
         // Delegate the raw insert to Infrastructure
         var user = await _authCommands.CreateUserAsync(
-            request.UserName, request.FullName, request.Email, passwordHash);
+            userName, request.FullName, request.Email, passwordHash);
 
         // Generate JWT
         var token = _jwtTokenGenerator.GenerateToken(user);
@@ -59,7 +65,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
     {
-        var user = await _authQueries.GetUserByEmailAsync(request.Email);
+        var user = await _authQueries.GetUserByEmailOrUsernameAsync(request.Email);
 
         // Use a single generic error to prevent user enumeration
         if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
@@ -96,11 +102,10 @@ public class AuthService : IAuthService
     public async Task ChangePasswordAsync(int userId, ChangePasswordRequest request)
     {
         // Business rule: verify current password before allowing change
-        var user = await _authQueries.GetUserByEmailAsync(
-            (await _authQueries.GetProfileAsync(userId))?.Email
-            ?? throw new KeyNotFoundException($"User {userId} not found."));
+        var user = await _authQueries.GetUserByIdAsync(userId)
+            ?? throw new KeyNotFoundException($"User {userId} not found.");
 
-        if (user == null || !_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
+        if (!_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
             throw new DomainException("Current password is incorrect.");
 
         var newHash = _passwordHasher.HashPassword(request.NewPassword);

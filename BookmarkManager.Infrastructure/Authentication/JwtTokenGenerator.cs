@@ -1,8 +1,7 @@
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Security;
 using BookmarkManager.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -12,10 +11,12 @@ namespace BookmarkManager.Infrastructure.Authentication;
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly JwtSettings _jwtSettings;
+    private readonly TimeProvider _timeProvider;
 
-    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions)
+    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, TimeProvider timeProvider)
     {
         _jwtSettings = jwtOptions.Value;
+        _timeProvider = timeProvider;
     }
 
     public string GenerateToken(User user)
@@ -35,7 +36,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+            expires: _timeProvider.GetUtcNow().UtcDateTime.AddMinutes(_jwtSettings.ExpiryMinutes),
             signingCredentials: creds
         );
 

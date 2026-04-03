@@ -7,8 +7,8 @@ public class CreateFolderRequestValidator : AbstractValidator<CreateFolderReques
 {
     public CreateFolderRequestValidator()
     {
-        RuleFor(x => x.UserId)
-            .GreaterThan(0).WithMessage("UserId must be a positive number.");
+        // RuleFor(x => x.UserId)
+        //     .GreaterThan(0).WithMessage("UserId must be a positive number.");
 
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Folder name is required.")

@@ -28,11 +28,33 @@ export class AuthService {
   }
 
   /**
-   * Checks if the user is authenticated.
+   * Checks if the user is authenticated by verifying token existence and expiration.
    */
   isAuthenticated(): boolean {
     const token = this.storage.getString(this.TOKEN_KEY);
-    return token !== null && token.length > 0;
+    if (!token || token.length === 0) return false;
+
+    // Check if token is expired
+    if (this.isTokenExpired(token)) {
+      this.logout(); // Auto-logout if token is expired
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Checks if a JWT token is expired by parsing the exp claim.
+   */
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp;
+      if (!exp) return true; // No expiration claim, treat as expired
+      return Date.now() >= exp * 1000; // exp is in seconds
+    } catch {
+      return true; // Invalid token format, treat as expired
+    }
   }
 
   /**
@@ -43,11 +65,11 @@ export class AuthService {
   }
 
   /**
-   * Gets the current user's ID. Returns 0 if not authenticated.
+   * Gets the current user's ID. Returns null if not authenticated.
    */
-  getUserId(): number {
+  getUserId(): number | null {
     const user = this.getStoredUser();
-    return user?.userId ?? 0;
+    return user?.userId ?? null;
   }
 
   /**

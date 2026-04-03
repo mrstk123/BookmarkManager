@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using BookmarkManager.Application.DTOs;
 
-namespace BookmarkManager.Application.Interfaces;
+namespace BookmarkManager.Application.Interfaces.Queries;
 
 public interface IUserQueries
 {

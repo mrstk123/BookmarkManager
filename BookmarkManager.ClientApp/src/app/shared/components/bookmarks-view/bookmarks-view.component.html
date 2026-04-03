@@ -55,33 +55,55 @@
   (confirm)="confirmDelete()">
 </app-delete-bookmark-modal>
 
+<!-- EMPTY STATE -->
+<div class="empty-state" *ngIf="bookmarks.length === 0">
+  <div class="empty-icon">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </div>
+  <h2 class="empty-title">No bookmarks yet</h2>
+  <p class="empty-desc">Save your favorite links and organize them with folders and tags.</p>
+  <button class="empty-cta" *ngIf="showNewButton" (click)="openModal()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    Add Your First Bookmark
+  </button>
+</div>
+
 <!-- GRID VIEW -->
-<div class="cards-grid" *ngIf="viewMode === 'grid'">
-  <div class="card-grid" *ngFor="let b of bookmarks; trackBy: trackByBookmarkId">
+<div class="cards-grid" *ngIf="viewMode === 'grid' && bookmarks.length > 0">
+  <div class="card-grid" *ngFor="let b of bookmarks; let i = index; trackBy: trackByBookmarkId"
+    [style.animation-delay]="(i * 50) + 'ms'">
+    <div class="card-color-stripe" [style.background]="'linear-gradient(90deg, ' + (b.color || '#8B5CF6') + ', ' + (b.color || '#8B5CF6') + '88)'"></div>
     <div class="card-head">
-      <div class="card-favicon" [style.background-color]="(b.color || '#8B5CF6') + '20'">
+      <div class="card-favicon" [style.background-color]="(b.color || '#8B5CF6') + '18'">
         <img *ngIf="getIconUrl(b)" [src]="getIconUrl(b)" alt="" width="16" height="16" class="favicon-img" />
         <svg *ngIf="!getIconUrl(b)" width="16" height="16" viewBox="0 0 24 24" fill="none"
           [attr.stroke]="b.color || '#8B5CF6'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
         </svg>
       </div>
-      <div class="card-actions">
-        <span class="action-icon" (click)="openEditModal(b)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"></path>
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-          </svg>
-        </span>
-        <span class="action-icon" (click)="openDeleteModal(b)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
-        </span>
-        <span class="action-icon" [class.fav-active]="b.isFavorite" (click)="onToggleFavorite(b)">
+      <div class="card-head-right">
+        <div class="card-actions">
+          <span class="action-icon" (click)="openEditModal(b)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+          </span>
+          <span class="action-icon" (click)="openDeleteModal(b)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </span>
+        </div>
+        <span class="fav-btn" [class.fav-active]="b.isFavorite" (click)="onToggleFavorite(b)">
           <svg width="16" height="16" viewBox="0 0 24 24" [attr.fill]="b.isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <polygon
@@ -92,10 +114,10 @@
       </div>
     </div>
     <h3 class="card-title">{{ b.title }}</h3>
-    <a class="card-url" [href]="b.url" target="_blank" rel="noopener noreferrer">{{ b.url }}</a>
+    <a class="card-url" [href]="b.url" target="_blank" rel="noopener noreferrer" (click)="onUrlClick(b.id)">{{ b.url }}</a>
     <div class="card-footer">
       <a class="folder-badge" [routerLink]="['/folder', b.folderName]" [style.color]="b.color || '#8B5CF6'"
-        [style.background-color]="(b.color || '#8B5CF6') + '20'">
+        [style.background-color]="(b.color || '#8B5CF6') + '14'">
         {{ b.folderName }}
       </a>
       <div class="tags-group">
@@ -107,9 +129,10 @@
 </div>
 
 <!-- LIST VIEW -->
-<div class="list-grid" *ngIf="viewMode === 'list'">
-  <div class="row-item" *ngFor="let b of bookmarks; trackBy: trackByBookmarkId">
-    <div class="row-favicon" [style.background-color]="(b.color || '#8B5CF6') + '20'">
+<div class="list-grid" *ngIf="viewMode === 'list' && bookmarks.length > 0">
+  <div class="row-item" *ngFor="let b of bookmarks; let i = index; trackBy: trackByBookmarkId"
+    [style.animation-delay]="(i * 30) + 'ms'" [style.border-left-color]="b.color || '#8B5CF6'">
+    <div class="row-favicon" [style.background-color]="(b.color || '#8B5CF6') + '18'">
       <img *ngIf="getIconUrl(b)" [src]="getIconUrl(b)" alt="" width="16" height="16" class="favicon-img" />
       <svg *ngIf="!getIconUrl(b)" width="16" height="16" viewBox="0 0 24 24" fill="none"
         [attr.stroke]="b.color || '#8B5CF6'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -118,14 +141,14 @@
     </div>
     <div class="row-text">
       <h3 class="row-title">{{ b.title }}</h3>
-      <a class="row-url" [href]="b.url" target="_blank" rel="noopener noreferrer">{{ b.url }}</a>
+      <a class="row-url" [href]="b.url" target="_blank" rel="noopener noreferrer" (click)="onUrlClick(b.id)">{{ b.url }}</a>
       <div class="row-tags">
         <span class="tag-text" *ngFor="let t of b.tags | slice:0:2">#{{ t }}</span>
         <span class="tag-more" *ngIf="b.tags.length > 2">+{{ b.tags.length - 2 }} more</span>
       </div>
     </div>
     <a class="folder-badge" [routerLink]="['/folder', b.folderName]" [style.color]="b.color || '#8B5CF6'"
-      [style.background-color]="(b.color || '#8B5CF6') + '20'">
+      [style.background-color]="(b.color || '#8B5CF6') + '14'">
       {{ b.folderName }}
     </a>
     <div class="row-actions">
@@ -143,14 +166,14 @@
           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
         </svg>
       </span>
-      <span class="action-icon" [class.fav-active]="b.isFavorite" (click)="onToggleFavorite(b)">
-        <svg width="16" height="16" viewBox="0 0 24 24" [attr.fill]="b.isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <polygon
-            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-          </polygon>
-        </svg>
-      </span>
     </div>
+    <span class="fav-btn" [class.fav-active]="b.isFavorite" (click)="onToggleFavorite(b)">
+      <svg width="16" height="16" viewBox="0 0 24 24" [attr.fill]="b.isFavorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <polygon
+          points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+        </polygon>
+      </svg>
+    </span>
   </div>
 </div>

@@ -64,7 +64,7 @@
                     </div>
                 </div>
                 <div class="dropdown-new-folder" *ngIf="isCreatingFolder">
-                    <input class="new-folder-input" [value]="newFolderName"
+                    <input class="new-folder-input" #newFolderInput [value]="newFolderName"
                         (input)="newFolderName = $any($event.target).value" placeholder="Folder name..."
                         (keydown.enter)="createFolder()" (keydown.escape)="cancelCreateFolder()" />
                     <div class="new-folder-actions">

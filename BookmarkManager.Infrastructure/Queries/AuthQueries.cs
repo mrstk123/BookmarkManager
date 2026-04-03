@@ -2,7 +2,6 @@ using Dapper;
 using BookmarkManager.Application.Interfaces.Queries;
 using BookmarkManager.Application.DTOs;
 using BookmarkManager.Domain.Entities;
-using BookmarkManager.Infrastructure;
 
 namespace BookmarkManager.Infrastructure.Queries;
 
@@ -32,12 +31,19 @@ public class AuthQueries : IAuthQueries
         return await conn.QueryFirstOrDefaultAsync<UserDto>(sql, new { Id = userId });
     }
 
-    public async Task<User?> GetUserByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailOrUsernameAsync(string emailOrUsername)
     {
-        // Explicit columns — includes PasswordHash so the caller can verify credentials.
-        // Only used internally by AuthService; the hash is never forwarded to API responses.
-        var sql = "SELECT Id, UserName, FullName, Email, PasswordHash, CreatedAt, UpdatedAt FROM Users WHERE Email = @Email";
+        // Allow login with either email or username
+        var sql = "SELECT Id, UserName, FullName, Email, PasswordHash, CreatedAt, UpdatedAt FROM Users WHERE Email = @EmailOrUsername OR UserName = @EmailOrUsername";
         using var conn = _connectionFactory.CreateConnection();
-        return await conn.QueryFirstOrDefaultAsync<User>(sql, new { Email = email });
+        return await conn.QueryFirstOrDefaultAsync<User>(sql, new { EmailOrUsername = emailOrUsername });
+    }
+
+    public async Task<User?> GetUserByIdAsync(int userId)
+    {
+        // Retrieves user by ID with PasswordHash for credential verification.
+        var sql = "SELECT Id, UserName, FullName, Email, PasswordHash, CreatedAt, UpdatedAt FROM Users WHERE Id = @Id";
+        using var conn = _connectionFactory.CreateConnection();
+        return await conn.QueryFirstOrDefaultAsync<User>(sql, new { Id = userId });
     }
 }

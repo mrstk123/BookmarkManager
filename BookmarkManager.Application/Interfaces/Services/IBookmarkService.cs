@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using BookmarkManager.Application.DTOs;
 
-namespace BookmarkManager.Application.Interfaces;
+namespace BookmarkManager.Application.Interfaces.Services;
 
 public interface IBookmarkService
 {
@@ -15,4 +13,5 @@ public interface IBookmarkService
     Task<BookmarkDto> UpdateAsync(int id, UpdateBookmarkRequest request);
     Task<int> DeleteAsync(int id);
     Task<int> ToggleFavoriteAsync(int id, int userId);
+    Task<int> RecordVisitAsync(int id);
 }

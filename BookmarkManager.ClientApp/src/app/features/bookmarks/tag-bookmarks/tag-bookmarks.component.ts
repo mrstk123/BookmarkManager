@@ -2,21 +2,21 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject, combineLatest, map, startWith, switchMap, merge, scan } from 'rxjs';
-import { AuthService } from '../../../../core/services/auth.service';
-import { BookmarksService } from '../../../../core/services/bookmarks.service';
-import { SearchService } from '../../../../core/services/search.service';
-import { Bookmark } from '../../../../models/bookmark.model';
-import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-view/bookmarks-view.component';
-import { filterBookmarks } from '../../../../shared/utils/filter.utils';
+import { AuthService } from '../../../core/services/auth.service';
+import { BookmarksService } from '../../../core/services/bookmarks.service';
+import { SearchService } from '../../../core/services/search.service';
+import { Bookmark } from '../../../models/bookmark.model';
+import { BookmarksViewComponent } from '../../../shared/components/bookmarks-view/bookmarks-view.component';
+import { filterBookmarks } from '../../../shared/utils/filter.utils';
 
 @Component({
-  selector: 'app-folder-bookmarks',
+  selector: 'app-tag-bookmarks',
   standalone: true,
   imports: [CommonModule, BookmarksViewComponent],
-  templateUrl: './folder-bookmarks.component.html',
-  styleUrls: ['./folder-bookmarks.component.scss'],
+  templateUrl: './tag-bookmarks.component.html',
+  styleUrls: ['./tag-bookmarks.component.scss'],
 })
-export class FolderBookmarksComponent implements OnInit {
+export class TagBookmarksComponent implements OnInit {
   route = inject(ActivatedRoute);
   private bookmarksService = inject(BookmarksService);
   private searchService = inject(SearchService);
@@ -26,12 +26,13 @@ export class FolderBookmarksComponent implements OnInit {
   private toggledSubject = new Subject<Bookmark>();
 
   ngOnInit() {
+    const userId = this.authService.getUserId() ?? 0;
     const search$ = this.searchService.searchQuery$.pipe(startWith(''));
 
     this.filteredBookmarks$ = this.route.paramMap.pipe(
       switchMap(params => {
-        const folderName = params.get('name') || '';
-        const bookmarks$ = this.bookmarksService.getBookmarksByFolder(this.authService.getUserId(), folderName);
+        const tagName = params.get('name') || '';
+        const bookmarks$ = this.bookmarksService.getBookmarksByTag(userId, tagName);
         return combineLatest([
           merge(
             bookmarks$,

@@ -19,7 +19,12 @@ public interface IAuthQueries
     Task<UserDto?> GetProfileAsync(int userId);
 
     /// <summary>
-    /// Retrieves the full User entity by email (used for credential verification at login).
+    /// Retrieves the full User entity by email
     /// </summary>
-    Task<User?> GetUserByEmailAsync(string email);
+    Task<User?> GetUserByEmailOrUsernameAsync(string emailOrUsername);
+
+    /// <summary>
+    /// Retrieves the full User entity by ID 
+    /// </summary>
+    Task<User?> GetUserByIdAsync(int userId);
 }

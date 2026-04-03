@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -19,9 +19,10 @@ export class LoginComponent {
   private api = inject(ApiService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   loginForm = this.formBuilder.group({
-    email: ['', [Validators.required, Validators.email]],
+    identifier: ['', [Validators.required]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
@@ -31,8 +32,8 @@ export class LoginComponent {
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.loginError = '';
-      const credentials = this.loginForm.value as { email: string; password: string };
-      this.api.login(credentials).subscribe({
+      const credentials = this.loginForm.value as { identifier: string; password: string };
+      this.api.login({ email: credentials.identifier, password: credentials.password }).subscribe({
         next: (res: AuthResponse) => {
           this.authService.login(res.token, {
             userId: res.id,
@@ -45,6 +46,7 @@ export class LoginComponent {
         error: (err: unknown) => {
           const errorMessage = (err as { error?: { message?: string } })?.error?.message;
           this.loginError = errorMessage || 'Login failed. Please try again.';
+          this.cdr.markForCheck();
         },
       });
     }

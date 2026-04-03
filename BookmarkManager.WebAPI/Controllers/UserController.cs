@@ -1,5 +1,5 @@
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +17,6 @@ public class UserController : ApiControllerBase
     }
 
     // GET /api/user/profile
-    // The userId comes from the JWT — no route parameter needed, prevents IDOR
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile()
     {

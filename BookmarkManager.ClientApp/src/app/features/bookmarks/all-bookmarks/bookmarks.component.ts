@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, combineLatest, map, startWith, merge, scan } from 'rxjs';
-import { AuthService } from '../../../../core/services/auth.service';
-import { SearchService } from '../../../../core/services/search.service';
-import { Bookmark } from '../../../../models/bookmark.model';
-import { BookmarksService } from '../../../../core/services/bookmarks.service';
-import { BookmarksViewComponent } from '../../../../shared/components/bookmarks-view/bookmarks-view.component';
-import { filterBookmarks } from '../../../../shared/utils/filter.utils';
+import { AuthService } from '../../../core/services/auth.service';
+import { SearchService } from '../../../core/services/search.service';
+import { Bookmark } from '../../../models/bookmark.model';
+import { BookmarksService } from '../../../core/services/bookmarks.service';
+import { BookmarksViewComponent } from '../../../shared/components/bookmarks-view/bookmarks-view.component';
+import { filterBookmarks } from '../../../shared/utils/filter.utils';
 
 @Component({
     selector: 'app-bookmarks-component',
@@ -24,7 +24,8 @@ export class BookmarksComponent implements OnInit {
     private toggledSubject = new Subject<Bookmark>();
 
     ngOnInit() {
-        const bookmarks$ = this.bookmarksService.getBookmarks(this.authService.getUserId());
+        const userId = this.authService.getUserId() ?? 0;
+        const bookmarks$ = this.bookmarksService.getBookmarks(userId);
         const search$ = this.searchService.searchQuery$.pipe(startWith(''));
 
         this.filteredBookmarks$ = combineLatest([

@@ -1,5 +1,7 @@
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Commands;
+using BookmarkManager.Application.Interfaces.Queries;
+using BookmarkManager.Application.Interfaces.Services;
 using BookmarkManager.Domain.Entities;
 
 namespace BookmarkManager.Application.Services;
@@ -8,11 +10,13 @@ public class FolderService : IFolderService
 {
     private readonly IFolderQueries _folderQueries;
     private readonly IFolderCommands _folderCommands;
+    private readonly TimeProvider _timeProvider;
 
-    public FolderService(IFolderQueries folderQueries, IFolderCommands folderCommands)
+    public FolderService(IFolderQueries folderQueries, IFolderCommands folderCommands, TimeProvider timeProvider)
     {
         _folderQueries = folderQueries;
         _folderCommands = folderCommands;
+        _timeProvider = timeProvider;
     }
 
     public async Task<FolderDto?> GetFolderByIdAsync(int id)
@@ -27,12 +31,13 @@ public class FolderService : IFolderService
 
     public async Task<FolderDto> AddAsync(CreateFolderRequest request)
     {
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         var folder = new Folder
         {
             UserId = request.UserId,
             Name = request.Name,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         var id = await _folderCommands.AddAsync(folder);
@@ -51,7 +56,7 @@ public class FolderService : IFolderService
         {
             Id = id,
             Name = request.Name,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime
         };
 
         await _folderCommands.UpdateAsync(folder);

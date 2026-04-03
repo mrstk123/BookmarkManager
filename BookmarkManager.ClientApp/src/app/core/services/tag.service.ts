@@ -23,13 +23,13 @@ export class TagService {
         });
     }
 
-    createTag(data: { name: string; userId: number }): Observable<Tag> {
+    createTag(data: { name: string }): Observable<Tag> {
         return this.http.post<Tag>(this.apiUrl, data).pipe(
             tap(() => this.loadTags())
         );
     }
 
-    updateTag(id: number, data: { name: string; userId: number }): Observable<Tag> {
+    updateTag(id: number, data: { name: string }): Observable<Tag> {
         return this.http.put<Tag>(`${this.apiUrl}/${id}`, data).pipe(
             tap(() => this.loadTags())
         );

@@ -8,8 +8,7 @@ public class LoginRequestValidator : AbstractValidator<LoginRequestDto>
     public LoginRequestValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("Email is required.")
-            .EmailAddress().WithMessage("Invalid email format.");
+            .NotEmpty().WithMessage("Email or username is required.");
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required.");

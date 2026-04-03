@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
-import { ApiService } from '../../../../core/services/api.service';
-import { UserProfile } from '../../../../models/user-profile.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
+import { UserProfile } from '../../models/user-profile.model';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
     selector: 'app-profile',
@@ -48,8 +48,7 @@ export class ProfileComponent implements OnInit {
             };
         }
 
-        const userId = this.authService.getUserId();
-        this.api.getProfile(userId).subscribe({
+        this.api.getProfile().subscribe({
             next: (profile) => {
                 this.profile = profile;
             },
@@ -74,8 +73,7 @@ export class ProfileComponent implements OnInit {
 
         this.profileMessage = '';
         this.profileError = '';
-        const userId = this.authService.getUserId();
-        this.api.updateProfile(userId, { fullName: name }).subscribe({
+        this.api.updateProfile({ fullName: name }).subscribe({
             next: (updated) => {
                 this.profile = updated;
                 this.authService.updateStoredFullName(updated.fullName);
@@ -113,8 +111,7 @@ export class ProfileComponent implements OnInit {
             return;
         }
 
-        const userId = this.authService.getUserId();
-        this.api.changePassword(userId, { currentPassword: currentPassword!, newPassword: newPassword! }).subscribe({
+        this.api.changePassword({ currentPassword: currentPassword!, newPassword: newPassword! }).subscribe({
             next: () => {
                 this.passwordMessage = 'Password changed successfully.';
                 this.passwordForm.reset();

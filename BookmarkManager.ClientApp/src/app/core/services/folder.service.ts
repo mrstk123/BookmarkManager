@@ -23,13 +23,13 @@ export class FolderService {
         });
     }
 
-    createFolder(data: { name: string; userId: number }): Observable<Folder> {
+    createFolder(data: { name: string }): Observable<Folder> {
         return this.http.post<Folder>(this.apiUrl, data).pipe(
             tap(() => this.loadFolders())
         );
     }
 
-    updateFolder(id: number, data: { name: string; userId: number }): Observable<Folder> {
+    updateFolder(id: number, data: { name: string }): Observable<Folder> {
         return this.http.put<Folder>(`${this.apiUrl}/${id}`, data).pipe(
             tap(() => this.loadFolders())
         );

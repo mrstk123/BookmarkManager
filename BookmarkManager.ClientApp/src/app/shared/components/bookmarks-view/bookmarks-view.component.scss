@@ -5,23 +5,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .page-title {
-  font-size: 28px;
+  font-size: var(--font-size-page-title);
   font-weight: 800;
   font-family: var(--font-display);
   color: var(--color-text-primary);
   margin: 0;
   white-space: nowrap;
   flex-shrink: 0;
+  letter-spacing: -0.3px;
 }
 
 .header-actions-group {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-shrink: 1;
   min-width: 0;
 }
@@ -30,22 +31,26 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--color-primary);
+  background: var(--color-bg-gradient);
   color: #fff;
   border: none;
-  padding: 12px 20px;
-  border-radius: 24px;
+  padding: 11px 22px;
+  border-radius: var(--radius-full);
   font-size: 14px;
   font-weight: 600;
   font-family: var(--font-sans);
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: transform var(--transition-spring), box-shadow var(--transition-normal);
   white-space: nowrap;
   flex-shrink: 0;
 
   &:hover {
-    background: #7c3aed;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow-primary);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
@@ -53,9 +58,10 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #E4E4E7;
-  border-radius: 20px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-full);
   padding: 4px;
+  border: 1px solid var(--color-border-light);
 }
 
 .view-toggle-btn {
@@ -63,17 +69,18 @@
   border: none;
   width: 34px;
   height: 34px;
-  border-radius: 16px;
+  border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: var(--color-text-tertiary);
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 
   &.active {
-    background: var(--color-bg-primary);
+    background: var(--color-surface-elevated);
     color: var(--color-primary);
+    box-shadow: var(--shadow-xs);
   }
 
   &:hover:not(.active) {
@@ -82,21 +89,104 @@
 }
 
 // =============================
+// EMPTY STATE
+// =============================
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: var(--radius-2xl);
+  background: var(--color-primary-subtle);
+  color: var(--color-primary-light);
+  margin-bottom: 24px;
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0 0 8px;
+}
+
+.empty-desc {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin: 0 0 28px;
+  max-width: 360px;
+  line-height: 1.5;
+}
+
+.empty-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: var(--color-bg-gradient);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: transform var(--transition-spring), box-shadow var(--transition-normal);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow-primary);
+  }
+}
+
+// =============================
 // GRID VIEW
 // =============================
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
 .card-grid {
-  background: var(--color-bg-secondary);
-  border-radius: 24px;
-  padding: 24px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-xl);
+  padding: 22px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-spring), box-shadow var(--transition-smooth);
+  animation: slideUp 0.4s ease both;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.card-color-stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
 .card-head {
@@ -107,22 +197,35 @@
 }
 
 .card-favicon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: box-shadow 0.3s ease;
 }
 
 .favicon-img {
   border-radius: 4px;
 }
 
+.card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .card-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  .card-grid:hover & {
+    opacity: 1;
+  }
 }
 
 .action-icon {
@@ -131,17 +234,35 @@
   justify-content: center;
   color: var(--color-text-tertiary);
   padding: 6px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition: color var(--transition-fast), background var(--transition-fast), transform var(--transition-spring);
 
   &:hover {
     color: var(--color-text-primary);
     background: rgba(0, 0, 0, 0.05);
   }
+}
+
+// Always-visible favorite button
+.fav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: color var(--transition-fast), transform var(--transition-spring);
+
+  &:hover {
+    color: var(--color-accent-amber);
+    transform: scale(1.1);
+  }
 
   &.fav-active {
-    color: var(--color-primary);
+    color: var(--color-accent-amber);
+    animation: starBounce 0.4s ease;
 
     svg {
       fill: currentColor;
@@ -150,31 +271,25 @@
 }
 
 .card-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   font-family: var(--font-display);
   color: var(--color-text-primary);
   margin: 0;
-}
-
-.card-excerpt {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  font-family: var(--font-sans);
-  margin: 0;
-  line-height: 1.5;
+  line-height: 1.3;
 }
 
 .card-url {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   font-family: var(--font-sans);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-fast);
 
   &:hover {
     color: var(--color-primary);
@@ -186,22 +301,24 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  margin-top: auto;
 }
 
 .folder-badge {
   display: inline-block;
-  padding: 6px 12px;
-  border-radius: 14px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
   font-size: 12px;
   font-weight: 600;
   font-family: var(--font-sans);
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
 
   &:hover {
     opacity: 0.8;
+    transform: scale(1.03);
   }
 }
 
@@ -212,14 +329,14 @@
 }
 
 .tag-text {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--color-text-tertiary);
   font-family: var(--font-sans);
 }
 
 .tag-more {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text-secondary);
   font-family: var(--font-sans);
@@ -231,23 +348,37 @@
 .list-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .row-item {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--color-bg-secondary);
-  border-radius: 16px;
-  padding: 16px 24px;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  border: 1px solid var(--color-border-light);
+  border-left: 3px solid transparent;
+  box-shadow: var(--shadow-xs);
+  transition: background var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-spring);
+  animation: slideUp 0.35s ease both;
+
+  &:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateX(2px);
+
+    .row-actions {
+      opacity: 1;
+    }
+  }
 }
 
 .row-favicon {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,28 +389,20 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .row-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   font-family: var(--font-display);
   color: var(--color-text-primary);
   margin: 0;
 }
 
-.row-excerpt {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  font-family: var(--font-sans);
-  margin: 0;
-  line-height: 1.4;
-}
-
 .row-url {
   font-size: 13px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   font-family: var(--font-sans);
   margin: 0;
   line-height: 1.4;
@@ -287,6 +410,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-fast);
 
   &:hover {
     color: var(--color-primary);
@@ -297,18 +421,26 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 8px;
+  padding-top: 4px;
 }
 
 .row-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 // =============================
 // Responsive
 // =============================
+@media (max-width: 1200px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .cards-grid {
     grid-template-columns: 1fr;
@@ -325,13 +457,11 @@
 
   .view-toggle-group {
     padding: 3px;
-    border-radius: 16px;
   }
 
   .view-toggle-btn {
     width: 30px;
     height: 30px;
-    border-radius: 14px;
 
     svg {
       width: 15px;
@@ -351,7 +481,7 @@
 
   .new-btn {
     padding: 10px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
   }
 
   .new-btn-text {
@@ -359,18 +489,12 @@
   }
 
   .header-actions-group {
-    gap: 12px;
-  }
-
-  .view-toggle-group {
-    padding: 3px;
-    border-radius: 16px;
+    gap: 8px;
   }
 
   .view-toggle-btn {
     width: 28px;
     height: 28px;
-    border-radius: 12px;
 
     svg {
       width: 14px;
@@ -380,7 +504,7 @@
 
   .cards-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
   }
 
   .card-grid {
@@ -400,6 +524,7 @@
     width: 100%;
     justify-content: flex-end;
     margin-top: 8px;
+    opacity: 1;
   }
 }
 
@@ -413,34 +538,13 @@
     font-size: 18px;
   }
 
-  .header-actions-group {
-    gap: 8px;
-  }
-
-  .view-toggle-group {
-    padding: 2px;
-    border-radius: 12px;
-  }
-
-  .view-toggle-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 10px;
-
-    svg {
-      width: 13px;
-      height: 13px;
-    }
-  }
-
   .cards-grid {
-    grid-template-columns: 1fr;
     gap: 12px;
   }
 
   .card-grid {
     padding: 16px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
   }
 
   .card-footer {
@@ -458,12 +562,7 @@
     align-items: flex-start;
     gap: 12px;
     padding: 12px;
-    border-radius: 12px;
-  }
-
-  .row-favicon {
-    width: 24px;
-    height: 24px;
+    border-radius: var(--radius-md);
   }
 
   .row-tags {
@@ -471,18 +570,28 @@
   }
 
   .card-title {
-    font-size: 16px;
-  }
-
-  .card-excerpt {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .row-title {
     font-size: 14px;
   }
 
-  .row-excerpt {
-    font-size: 12px;
+  .empty-state {
+    padding: 48px 20px;
+  }
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+
+    svg {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .empty-title {
+    font-size: 20px;
   }
 }

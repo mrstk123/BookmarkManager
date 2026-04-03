@@ -1,8 +1,5 @@
-using System.Data;
-using System.Threading.Tasks;
-using BookmarkManager.Infrastructure;
-using BookmarkManager.Application.Interfaces;
 using BookmarkManager.Domain.Entities;
+using BookmarkManager.Application.Interfaces.Commands;
 using Dapper;
 using Npgsql;
 
@@ -43,7 +40,7 @@ public class FolderCommands : IFolderCommands
             SET Name = @Name,
                 UpdatedAt = @UpdatedAt
             WHERE Id = @Id";
-            
+
         using var conn = _connectionFactory.CreateConnection();
         conn.Open();
         return await conn.ExecuteAsync(sql, folder);

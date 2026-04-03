@@ -108,6 +108,16 @@ export class BookmarksViewComponent implements OnInit {
     return b.iconUrl || getFaviconUrl(b.url);
   }
 
+  /**
+   * Record a visit when the user clicks on a bookmark URL.
+   * The URL still opens in a new tab.
+   */
+  onUrlClick(bookmarkId: number): void {
+    this.bookmarksService.recordVisit(bookmarkId).subscribe({
+      error: (err) => console.error('Failed to record visit', err),
+    });
+  }
+
   trackByBookmarkId(_index: number, b: Bookmark): number {
     return b.id;
   }

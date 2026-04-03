@@ -1,6 +1,6 @@
 using BookmarkManager.Application.DTOs;
 
-namespace BookmarkManager.Application.Interfaces;
+namespace BookmarkManager.Application.Interfaces.Queries;
 
 public interface IFolderQueries
 {

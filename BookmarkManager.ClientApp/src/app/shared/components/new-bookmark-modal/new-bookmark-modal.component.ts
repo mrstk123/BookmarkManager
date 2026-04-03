@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output, DestroyRef } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Input, OnInit, Output, DestroyRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -53,6 +53,8 @@ export class NewBookmarkModalComponent implements OnInit {
   showTagSuggestions = false;
   tagInputValue = '';
   isFavorite = false;
+
+  @ViewChild('newFolderInput') newFolderInput!: ElementRef<HTMLInputElement>;
 
   get isEditMode(): boolean {
     return !!this.bookmark;
@@ -167,6 +169,7 @@ export class NewBookmarkModalComponent implements OnInit {
   startCreateFolder(): void {
     this.isCreatingFolder = true;
     this.newFolderName = '';
+    setTimeout(() => this.newFolderInput?.nativeElement.focus());
   }
 
   cancelCreateFolder(): void {
@@ -178,7 +181,7 @@ export class NewBookmarkModalComponent implements OnInit {
     const name = this.newFolderName.trim();
     if (!name) return;
 
-    this.folderService.createFolder({ name, userId: this.authService.getUserId() }).subscribe({
+    this.folderService.createFolder({ name }).subscribe({
       next: (folder) => {
         this.isCreatingFolder = false;
         this.newFolderName = '';

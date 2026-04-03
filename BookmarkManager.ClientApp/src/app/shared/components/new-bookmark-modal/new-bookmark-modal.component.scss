@@ -2,8 +2,11 @@
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.2);
-    z-index: 100;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: var(--z-modal-backdrop);
+    animation: backdropFadeIn 0.25s ease forwards;
 }
 
 // === Modal Panel ===
@@ -14,11 +17,13 @@
     transform: translate(-50%, -50%);
     width: 560px;
     max-width: 92vw;
-    background: var(--color-bg-primary);
-    border-radius: 32px;
-    padding: 48px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
-    z-index: 101;
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-2xl);
+    padding: 40px;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--color-border-light);
+    z-index: var(--z-modal);
+    animation: slideUpModal 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 // === Header ===
@@ -26,15 +31,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
 }
 
 .modal-title {
     font-family: var(--font-display);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
     color: var(--color-text-primary);
     margin: 0;
+    letter-spacing: -0.3px;
 }
 
 .close-btn {
@@ -42,14 +48,16 @@
     border: none;
     cursor: pointer;
     color: var(--color-text-tertiary);
-    padding: 4px;
+    padding: 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.15s;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background var(--transition-fast);
 
     &:hover {
         color: var(--color-text-primary);
+        background: var(--color-bg-secondary);
     }
 }
 
@@ -57,35 +65,36 @@
 .modal-form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 22px;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     position: relative;
 }
 
 .field-label {
     font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .field-input {
     width: 100%;
-    padding: 16px 20px;
-    border-radius: 20px;
-    border: none;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid transparent;
     background: var(--color-bg-secondary);
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 14px;
     color: var(--color-text-primary);
     outline: none;
-    transition: box-shadow 0.2s;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal), background var(--transition-normal);
 
     &::placeholder {
         color: var(--color-text-tertiary);
@@ -93,7 +102,9 @@
     }
 
     &:focus {
-        box-shadow: 0 0 0 2px var(--color-primary);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-primary-subtle);
+        background: var(--color-bg-primary);
     }
 }
 
@@ -103,22 +114,27 @@
     align-items: center;
     gap: 12px;
     background: var(--color-bg-secondary);
-    border-radius: 20px;
-    padding: 0 20px;
-    transition: box-shadow 0.2s;
+    border-radius: var(--radius-md);
+    padding: 0 18px;
+    border: 1.5px solid transparent;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal), background var(--transition-normal);
 
     &:focus-within {
-        box-shadow: 0 0 0 2px var(--color-primary);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-primary-subtle);
+        background: var(--color-bg-primary);
     }
 
     .field-input {
         background: transparent;
-        padding: 16px 0;
+        padding: 14px 0;
         border-radius: 0;
+        border: none;
         box-shadow: none;
 
         &:focus {
             box-shadow: none;
+            border: none;
         }
     }
 }
@@ -128,8 +144,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
 
     img {
         border-radius: 4px;
@@ -142,15 +158,20 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 16px 20px;
-    border-radius: 20px;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
     background: var(--color-bg-secondary);
+    border: 1.5px solid transparent;
     cursor: pointer;
-    transition: box-shadow 0.2s;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+
+    &:hover {
+        border-color: var(--color-border);
+    }
 
     .select-text {
         font-family: var(--font-sans);
-        font-size: 15px;
+        font-size: 14px;
         color: var(--color-text-primary);
 
         &.placeholder {
@@ -160,6 +181,7 @@
 
     svg {
         color: var(--color-primary);
+        transition: transform var(--transition-fast);
     }
 }
 
@@ -169,20 +191,23 @@
     left: 0;
     right: 0;
     margin-top: 4px;
-    background: var(--color-bg-primary);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    z-index: 10;
-    overflow: hidden;
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border-light);
+    z-index: var(--z-dropdown);
+    overflow-y: auto;
+    max-height: 200px;
+    animation: slideUp 0.2s ease;
 }
 
 .dropdown-item {
-    padding: 12px 20px;
+    padding: 11px 18px;
     font-family: var(--font-sans);
     font-size: 14px;
     color: var(--color-text-primary);
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background var(--transition-fast);
 
     &:hover {
         background: var(--color-bg-secondary);
@@ -191,7 +216,7 @@
 
 // === Create Folder Trigger ===
 .dropdown-create {
-    border-top: 1px solid var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border-light);
 }
 
 .create-folder-trigger {
@@ -209,23 +234,24 @@
 // === New Folder Inline Input ===
 .dropdown-new-folder {
     padding: 12px 16px;
-    border-top: 1px solid var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border-light);
 }
 
 .new-folder-input {
     width: 100%;
     padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+    border: 1.5px solid transparent;
     background: var(--color-bg-secondary);
     font-family: var(--font-sans);
     font-size: 14px;
     color: var(--color-text-primary);
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 
     &:focus {
         border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-primary-subtle);
     }
 
     &::placeholder {
@@ -243,12 +269,12 @@
 .new-folder-btn {
     border: none;
     padding: 6px 14px;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background var(--transition-fast);
 
     &.cancel {
         background: none;
@@ -264,7 +290,7 @@
         color: #fff;
 
         &:hover:not(:disabled) {
-            background: #7c3aed;
+            background: var(--color-primary-dark);
         }
 
         &:disabled {
@@ -280,31 +306,40 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 12px 20px;
-    border-radius: 20px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
     background: var(--color-bg-secondary);
-    min-height: 52px;
+    min-height: 50px;
+    border: 1.5px solid transparent;
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal), background var(--transition-normal);
+
+    &:focus-within {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-primary-subtle);
+        background: var(--color-bg-primary);
+    }
 }
 
 .tag-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
-    border-radius: 16px;
-    background: var(--color-bg-primary);
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
+    background: var(--color-primary-subtle);
     font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 500;
-    color: var(--color-text-primary);
+    color: var(--color-primary);
+    animation: scaleIn 0.2s ease;
 
     svg {
-        color: var(--color-text-tertiary);
+        color: var(--color-primary-light);
         cursor: pointer;
-        transition: color 0.15s;
+        transition: color var(--transition-fast);
 
         &:hover {
-            color: var(--color-text-primary);
+            color: var(--color-accent-red);
         }
     }
 }
@@ -315,7 +350,7 @@
     border: none;
     background: transparent;
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 14px;
     color: var(--color-text-primary);
     outline: none;
 
@@ -331,13 +366,15 @@
     left: 0;
     right: 0;
     margin-top: 4px;
-    background: var(--color-bg-primary);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    z-index: 10;
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border-light);
+    z-index: var(--z-dropdown);
     overflow: hidden;
     max-height: 160px;
     overflow-y: auto;
+    animation: slideUp 0.15s ease;
 }
 
 .tag-suggestion-item {
@@ -346,7 +383,7 @@
     font-size: 14px;
     color: var(--color-text-primary);
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background var(--transition-fast);
 
     &:hover {
         background: var(--color-bg-secondary);
@@ -376,8 +413,8 @@
     width: 48px;
     height: 28px;
     border-radius: 14px;
-    background: var(--color-bg-secondary);
-    transition: background 0.2s;
+    background: var(--color-bg-tertiary);
+    transition: background 0.25s ease;
     position: relative;
 
     &::after {
@@ -388,8 +425,8 @@
         height: 20px;
         border-radius: 10px;
         background: #fff;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-        transition: transform 0.2s;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     &.active {
@@ -406,21 +443,21 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     margin-top: 8px;
 }
 
 .btn-cancel {
     background: none;
     border: none;
-    padding: 14px 24px;
-    border-radius: 24px;
+    padding: 12px 22px;
+    border-radius: var(--radius-md);
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--color-text-secondary);
     cursor: pointer;
-    transition: color 0.15s, background 0.15s;
+    transition: color var(--transition-fast), background var(--transition-fast);
 
     &:hover {
         color: var(--color-text-primary);
@@ -429,24 +466,40 @@
 }
 
 .btn-save {
-    background: var(--color-primary);
+    background: var(--color-bg-gradient);
     border: none;
-    padding: 14px 28px;
-    border-radius: 24px;
+    padding: 12px 28px;
+    border-radius: var(--radius-md);
     font-family: var(--font-sans);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: #fff;
     cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
+    transition: transform var(--transition-spring), box-shadow var(--transition-normal);
 
     &:hover:not(:disabled) {
-        background: #7c3aed;
         transform: translateY(-1px);
+        box-shadow: var(--shadow-glow-primary);
     }
 
     &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+}
+
+// === Responsive ===
+@media (max-width: 600px) {
+    .modal-panel {
+        padding: 28px;
+        border-radius: var(--radius-xl);
+    }
+
+    .modal-title {
+        font-size: 22px;
+    }
+
+    .modal-form {
+        gap: 18px;
     }
 }

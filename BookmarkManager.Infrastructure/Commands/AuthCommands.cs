@@ -14,10 +14,12 @@ namespace BookmarkManager.Infrastructure.Commands;
 public class AuthCommands : IAuthCommands
 {
     private readonly IConnectionFactory _connectionFactory;
+    private readonly TimeProvider _timeProvider;
 
-    public AuthCommands(IConnectionFactory connectionFactory)
+    public AuthCommands(IConnectionFactory connectionFactory, TimeProvider timeProvider)
     {
         _connectionFactory = connectionFactory;
+        _timeProvider = timeProvider;
     }
 
     public async Task<User> CreateUserAsync(string userName, string fullName, string email, string passwordHash)
@@ -38,7 +40,7 @@ public class AuthCommands : IAuthCommands
                 SELECT CAST(SCOPE_IDENTITY() as int);
               """;
 
-        var now = DateTime.UtcNow;
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         var userId = await conn.ExecuteScalarAsync<int>(sql, new
         {
             UserName = userName,
@@ -72,7 +74,7 @@ public class AuthCommands : IAuthCommands
             throw new KeyNotFoundException($"User {userId} not found.");
 
         var updateSql = "UPDATE Users SET FullName = @FullName, UpdatedAt = @UpdatedAt WHERE Id = @Id";
-        var updatedAt = DateTime.UtcNow;
+        var updatedAt = _timeProvider.GetUtcNow().UtcDateTime;
         await conn.ExecuteAsync(updateSql, new { Id = userId, FullName = request.FullName, UpdatedAt = updatedAt });
 
         return new UserDto
@@ -94,7 +96,7 @@ public class AuthCommands : IAuthCommands
         {
             Id = userId,
             PasswordHash = newPasswordHash,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime
         });
     }
 }

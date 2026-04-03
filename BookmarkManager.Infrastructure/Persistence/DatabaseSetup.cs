@@ -11,7 +11,7 @@ public static class DatabaseSetup
 
         if (provider?.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) == true)
         {
-            string connectionString = configuration.GetConnectionString("PostgresConnection") ?? throw new Exception("Postgres connection string is missing");
+            string connectionString = configuration.GetConnectionString("PostgresConnection") ?? throw new InvalidOperationException("Postgres connection string is missing in configuration.");
             // 1. Ensure the actual database exists (Creates it if missing)
             EnsureDatabase.For.PostgresqlDatabase(connectionString);
 
@@ -27,12 +27,12 @@ public static class DatabaseSetup
             if (!result.Successful)
             {
                 // Stop the application from starting if the database is in a bad state
-                throw new Exception("Database migration failed", result.Error);
+                throw new InvalidOperationException("Database migration failed.", result.Error);
             }
         }
         else
         {
-            string connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("SQL Server connection string is missing");
+            string connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("SQL Server connection string is missing in configuration.");
 
             // 1. Ensure the actual database exists (Creates it if missing)
             EnsureDatabase.For.SqlDatabase(connectionString);
@@ -49,7 +49,7 @@ public static class DatabaseSetup
             if (!result.Successful)
             {
                 // Stop the application from starting if the database is in a bad state
-                throw new Exception("Database migration failed", result.Error);
+                throw new InvalidOperationException("Database migration failed.", result.Error);
             }
         }
 

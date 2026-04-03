@@ -83,7 +83,7 @@ export class RegisterComponent {
         email: formValue.email,
         fullName: formValue.fullName,
         password: formValue.password,
-        userName: formValue.email,
+        userName: '', // Backend will extract email prefix as username
       };
       this.api.register(registrationData).subscribe({
         next: (res: AuthResponse) => {

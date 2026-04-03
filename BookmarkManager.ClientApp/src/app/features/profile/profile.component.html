@@ -26,8 +26,8 @@
 
         <!-- Inline edit name -->
         <div class="edit-name-row" *ngIf="isEditingName">
-          <input class="edit-name-input" [(ngModel)]="editName" placeholder="Full name"
-            (keydown.enter)="onSaveName()" (keydown.escape)="cancelEditName()" autofocus />
+          <input class="edit-name-input" [(ngModel)]="editName" placeholder="Full name" (keydown.enter)="onSaveName()"
+            (keydown.escape)="cancelEditName()" autofocus />
           <button class="edit-confirm-btn" type="button" (click)="onSaveName()" [disabled]="!editName.trim()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
               stroke-linecap="round" stroke-linejoin="round">
@@ -69,10 +69,12 @@
       </button>
     </div>
   </div>
+</div>
 
-  <!-- Change Password Modal -->
-  <div class="modal-backdrop" *ngIf="showPasswordModal" (click)="closePasswordModal()"></div>
-  <div class="modal-panel" *ngIf="showPasswordModal" (click)="$event.stopPropagation()">
+<!-- Change Password Modal -->
+<div class="modal-overlay" *ngIf="showPasswordModal">
+  <div class="modal-backdrop" (click)="closePasswordModal()"></div>
+  <div class="modal-panel" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <div class="modal-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

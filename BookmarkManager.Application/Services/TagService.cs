@@ -1,5 +1,7 @@
 using BookmarkManager.Application.DTOs;
-using BookmarkManager.Application.Interfaces;
+using BookmarkManager.Application.Interfaces.Commands;
+using BookmarkManager.Application.Interfaces.Queries;
+using BookmarkManager.Application.Interfaces.Services;
 using BookmarkManager.Domain.Entities;
 
 namespace BookmarkManager.Application.Services;
@@ -8,11 +10,13 @@ public class TagService : ITagService
 {
     private readonly ITagQueries _tagQueries;
     private readonly ITagCommands _tagCommands;
+    private readonly TimeProvider _timeProvider;
 
-    public TagService(ITagQueries tagQueries, ITagCommands tagCommands)
+    public TagService(ITagQueries tagQueries, ITagCommands tagCommands, TimeProvider timeProvider)
     {
         _tagQueries = tagQueries;
         _tagCommands = tagCommands;
+        _timeProvider = timeProvider;
     }
 
     public async Task<TagDto?> GetTagByIdAsync(int id)
@@ -27,12 +31,13 @@ public class TagService : ITagService
 
     public async Task<TagDto> AddAsync(CreateTagRequest request)
     {
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
         var tag = new Tag
         {
             UserId = request.UserId,
             Name = request.Name,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         var id = await _tagCommands.AddAsync(tag);
@@ -53,7 +58,7 @@ public class TagService : ITagService
         {
             Id = id,
             Name = request.Name,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime
         };
 
         await _tagCommands.UpdateAsync(tag);

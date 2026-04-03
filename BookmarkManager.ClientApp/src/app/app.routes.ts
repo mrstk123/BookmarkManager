@@ -11,11 +11,11 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/layout.component').then(m => m.LayoutComponent),
     canActivate: [authGuard],
     children: [
-      { path: 'bookmarks', loadComponent: () => import('./features/bookmarks/pages/bookmarks/bookmarks.component').then(m => m.BookmarksComponent) },
-      { path: 'favorites', loadComponent: () => import('./features/bookmarks/pages/favorites/favorites.component').then(m => m.FavoritesComponent) },
-      { path: 'profile', loadComponent: () => import('./features/profile/pages/profile/profile.component').then(m => m.ProfileComponent) },
-      { path: 'folder/:name', loadComponent: () => import('./features/bookmarks/pages/folder-bookmarks/folder-bookmarks.component').then(m => m.FolderBookmarksComponent) },
-      { path: 'tag/:name', loadComponent: () => import('./features/bookmarks/pages/tag-bookmarks/tag-bookmarks.component').then(m => m.TagBookmarksComponent) },
+      { path: 'bookmarks', loadComponent: () => import('./features/bookmarks/all-bookmarks/bookmarks.component').then(m => m.BookmarksComponent) },
+      { path: 'favorites', loadComponent: () => import('./features/bookmarks/favorites/favorites.component').then(m => m.FavoritesComponent) },
+      { path: 'profile', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
+      { path: 'folder/:name', loadComponent: () => import('./features/bookmarks/folder-bookmarks/folder-bookmarks.component').then(m => m.FolderBookmarksComponent) },
+      { path: 'tag/:name', loadComponent: () => import('./features/bookmarks/tag-bookmarks/tag-bookmarks.component').then(m => m.TagBookmarksComponent) },
     ]
   },
 

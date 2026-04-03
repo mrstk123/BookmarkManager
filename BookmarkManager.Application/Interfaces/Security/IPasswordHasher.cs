@@ -1,4 +1,4 @@
-namespace BookmarkManager.Application.Interfaces;
+namespace BookmarkManager.Application.Interfaces.Security;
 
 public interface IPasswordHasher
 {
