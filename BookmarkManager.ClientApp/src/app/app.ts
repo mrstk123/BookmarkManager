@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { GlobalLoadingComponent } from './core/components/global-loading/global-loading.component';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet],
+    imports: [RouterOutlet, GlobalLoadingComponent],
     templateUrl: './app.html',
     styleUrls: []
 })
