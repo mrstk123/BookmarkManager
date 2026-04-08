@@ -1,5 +1,6 @@
 using BookmarkManager.Application.DTOs;
 using BookmarkManager.Application.Interfaces.Queries;
+using BookmarkManager.Infrastructure.Connection;
 using Dapper;
 
 namespace BookmarkManager.Infrastructure.Queries;

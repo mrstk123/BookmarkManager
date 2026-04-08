@@ -14,27 +14,27 @@ export class BookmarksService {
 
   private refresh$ = new BehaviorSubject<void>(undefined);
 
-  getBookmarks(userId: number): Observable<Bookmark[]> {
+  getBookmarks(): Observable<Bookmark[]> {
     return this.refresh$.pipe(
-      switchMap(() => this.http.get<Bookmark[]>(`${this.apiUrl}/user/${userId}`))
+      switchMap(() => this.http.get<Bookmark[]>(this.apiUrl))
     );
   }
 
-  getFavorites(userId: number): Observable<Bookmark[]> {
+  getFavorites(): Observable<Bookmark[]> {
     return this.refresh$.pipe(
-      switchMap(() => this.http.get<Bookmark[]>(`${this.apiUrl}/favorites/${userId}`))
+      switchMap(() => this.http.get<Bookmark[]>(`${this.apiUrl}/favorites`))
     );
   }
 
-  getBookmarksByFolder(userId: number, folderName: string): Observable<Bookmark[]> {
+  getBookmarksByFolder(folderName: string): Observable<Bookmark[]> {
     return this.refresh$.pipe(
-      switchMap(() => this.http.get<Bookmark[]>(`${this.apiUrl}/user/${userId}?folderName=${encodeURIComponent(folderName)}`))
+      switchMap(() => this.http.get<Bookmark[]>(`${this.apiUrl}?folderName=${encodeURIComponent(folderName)}`))
     );
   }
 
-  getBookmarksByTag(userId: number, tagName: string): Observable<Bookmark[]> {
+  getBookmarksByTag(tagName: string): Observable<Bookmark[]> {
     return this.refresh$.pipe(
-      switchMap(() => this.http.get<Bookmark[]>(`${this.apiUrl}/user/${userId}?tagName=${encodeURIComponent(tagName)}`))
+      switchMap(() => this.http.get<Bookmark[]>(`${this.apiUrl}?tagName=${encodeURIComponent(tagName)}`))
     );
   }
 

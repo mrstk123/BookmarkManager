@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using BookmarkManager.Domain.Interfaces;
+using BookmarkManager.Application.Interfaces.Services;
 
 namespace BookmarkManager.Infrastructure.Services;
 

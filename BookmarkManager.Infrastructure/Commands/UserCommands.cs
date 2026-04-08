@@ -1,5 +1,6 @@
 using BookmarkManager.Domain.Entities;
 using BookmarkManager.Application.Interfaces.Commands;
+using BookmarkManager.Infrastructure.Connection;
 using Dapper;
 using Npgsql;
 
@@ -7,9 +8,9 @@ namespace BookmarkManager.Infrastructure.Commands;
 
 public class UserCommands : IUserCommands
 {
-    private readonly BookmarkManager.Infrastructure.IConnectionFactory _connectionFactory;
+    private readonly IConnectionFactory _connectionFactory;
 
-    public UserCommands(BookmarkManager.Infrastructure.IConnectionFactory connectionFactory)
+    public UserCommands(IConnectionFactory connectionFactory)
     {
         _connectionFactory = connectionFactory;
     }

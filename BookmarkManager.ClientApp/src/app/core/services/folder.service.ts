@@ -2,22 +2,19 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Folder } from '../../models/folder.model';
-import { AuthService } from './auth.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class FolderService {
     private http = inject(HttpClient);
-    private authService = inject(AuthService);
     private apiUrl = '/api/Folder';
 
     private foldersSubject = new BehaviorSubject<Folder[]>([]);
     folders$ = this.foldersSubject.asObservable();
 
     loadFolders(): void {
-        const userId = this.authService.getUserId();
-        this.http.get<Folder[]>(`${this.apiUrl}/user/${userId}`).subscribe({
+        this.http.get<Folder[]>(this.apiUrl).subscribe({
             next: (folders) => this.foldersSubject.next(folders),
             error: (err) => console.error('Failed to load folders', err),
         });

@@ -1,7 +1,7 @@
 using BookmarkManager.Application.Interfaces.Security;
 using BookmarkManager.Application.Interfaces.Commands;
 using BookmarkManager.Application.Interfaces.Queries;
-using BookmarkManager.Domain.Interfaces;
+using BookmarkManager.Application.Interfaces.Services;
 using BookmarkManager.Infrastructure.Commands;
 using BookmarkManager.Infrastructure.Queries;
 using BookmarkManager.Infrastructure.Services;
@@ -40,7 +40,7 @@ public static class DependencyInjection
         services.AddScoped<ITagCommands, TagCommands>();
         services.AddScoped<IAuthCommands, AuthCommands>();
 
-        // Domain Services
+        // Services
         services.AddScoped<IImportHashGenerator, ImportHashGenerator>();
 
         return services;

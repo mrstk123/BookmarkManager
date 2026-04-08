@@ -29,12 +29,14 @@ public class TagController : ApiControllerBase
         return Ok(tag);
     }
 
-    // GET /api/tag/user/{userId}
-    [HttpGet("user/{userId:int}")]
-    public async Task<IActionResult> GetTags(int userId)
+    // GET /api/tag
+    [HttpGet]
+    public async Task<IActionResult> GetTags()
     {
-        var forbidden = EnforceOwnership(userId);
-        if (forbidden != null) return forbidden;
+        var userId = GetCurrentUserId();
+        // EnforceOwnership is needed only when userId comes from the client (e.g. path/query param).
+        // var forbidden = EnforceOwnership(userId);
+        // if (forbidden != null) return forbidden;
 
         return Ok(await _tagService.GetTagsByUserIdAsync(userId));
     }

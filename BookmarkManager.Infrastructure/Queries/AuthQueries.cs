@@ -2,6 +2,7 @@ using Dapper;
 using BookmarkManager.Application.Interfaces.Queries;
 using BookmarkManager.Application.DTOs;
 using BookmarkManager.Domain.Entities;
+using BookmarkManager.Infrastructure.Connection;
 
 namespace BookmarkManager.Infrastructure.Queries;
 
@@ -41,7 +42,6 @@ public class AuthQueries : IAuthQueries
 
     public async Task<User?> GetUserByIdAsync(int userId)
     {
-        // Retrieves user by ID with PasswordHash for credential verification.
         var sql = "SELECT Id, UserName, FullName, Email, PasswordHash, CreatedAt, UpdatedAt FROM Users WHERE Id = @Id";
         using var conn = _connectionFactory.CreateConnection();
         return await conn.QueryFirstOrDefaultAsync<User>(sql, new { Id = userId });

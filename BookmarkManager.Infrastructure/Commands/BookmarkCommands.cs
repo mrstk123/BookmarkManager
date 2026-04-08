@@ -1,5 +1,6 @@
 using BookmarkManager.Domain.Entities;
 using BookmarkManager.Application.Interfaces.Commands;
+using BookmarkManager.Infrastructure.Connection;
 using Dapper;
 using Npgsql;
 
@@ -65,9 +66,13 @@ public class BookmarkCommands : IBookmarkCommands
 
     public async Task<int> ToggleFavoriteAsync(int id, int userId)
     {
-        var sql = "UPDATE Bookmarks SET IsFavorite = NOT IsFavorite, UpdatedAt = @UpdatedAt WHERE Id = @Id AND UserId = @UserId";
         using var conn = _connectionFactory.CreateConnection();
         conn.Open();
+
+        var sql = conn is NpgsqlConnection
+            ? "UPDATE Bookmarks SET IsFavorite = NOT IsFavorite, UpdatedAt = @UpdatedAt WHERE Id = @Id AND UserId = @UserId"
+            : "UPDATE Bookmarks SET IsFavorite = IsFavorite ^ 1, UpdatedAt = @UpdatedAt WHERE Id = @Id AND UserId = @UserId";
+
         return await conn.ExecuteAsync(sql, new { Id = id, UserId = userId, UpdatedAt = _timeProvider.GetUtcNow().UtcDateTime });
     }
 

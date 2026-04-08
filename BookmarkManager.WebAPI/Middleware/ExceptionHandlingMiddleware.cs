@@ -45,8 +45,8 @@ public class ExceptionHandlingMiddleware
 
         switch (exception)
         {
-            // Intentional business-rule violations (DomainException) → 400
-            case DomainException:
+            // Intentional business-rule violations (BusinessRuleException) → 400
+            case BusinessRuleException:
                 _logger.LogWarning("Domain rule violation: {Message}", exception.Message);
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
                 errorResponse.StatusCode = (int)HttpStatusCode.BadRequest;

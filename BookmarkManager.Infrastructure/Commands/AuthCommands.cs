@@ -1,6 +1,7 @@
 using BookmarkManager.Application.DTOs;
 using BookmarkManager.Application.Interfaces.Commands;
 using BookmarkManager.Domain.Entities;
+using BookmarkManager.Infrastructure.Connection;
 using Dapper;
 using Npgsql;
 
@@ -8,8 +9,6 @@ namespace BookmarkManager.Infrastructure.Commands;
 
 /// <summary>
 /// Infrastructure implementation of IAuthCommands — pure DB writes using Dapper.
-/// All business logic (uniqueness checks, password hashing, JWT generation) lives
-/// in the Application layer (AuthService).
 /// </summary>
 public class AuthCommands : IAuthCommands
 {
@@ -68,10 +67,8 @@ public class AuthCommands : IAuthCommands
         var getUserSql = "SELECT Id, UserName, FullName, Email, CreatedAt, UpdatedAt FROM Users WHERE Id = @Id";
         using var conn = _connectionFactory.CreateConnection();
         conn.Open();
-        var user = await conn.QueryFirstOrDefaultAsync<User>(getUserSql, new { Id = userId });
-
-        if (user == null)
-            throw new KeyNotFoundException($"User {userId} not found.");
+        var user = await conn.QueryFirstOrDefaultAsync<User>(getUserSql, new { Id = userId }) ??
+                    throw new KeyNotFoundException($"User {userId} not found.");
 
         var updateSql = "UPDATE Users SET FullName = @FullName, UpdatedAt = @UpdatedAt WHERE Id = @Id";
         var updatedAt = _timeProvider.GetUtcNow().UtcDateTime;

@@ -2,22 +2,19 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Tag } from '../../models/tag.model';
-import { AuthService } from './auth.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class TagService {
     private http = inject(HttpClient);
-    private authService = inject(AuthService);
     private apiUrl = '/api/Tag';
 
     private tagsSubject = new BehaviorSubject<Tag[]>([]);
     tags$ = this.tagsSubject.asObservable();
 
     loadTags(): void {
-        const userId = this.authService.getUserId();
-        this.http.get<Tag[]>(`${this.apiUrl}/user/${userId}`).subscribe({
+        this.http.get<Tag[]>(this.apiUrl).subscribe({
             next: (tags) => this.tagsSubject.next(tags),
             error: (err) => console.error('Failed to load tags', err),
         });

@@ -2,6 +2,7 @@ using System.Data;
 using Dapper;
 using BookmarkManager.Application.Interfaces.Queries;
 using BookmarkManager.Application.DTOs;
+using BookmarkManager.Infrastructure.Connection;
 
 namespace BookmarkManager.Infrastructure.Queries;
 

@@ -5,8 +5,6 @@ namespace BookmarkManager.Application.Interfaces.Commands;
 
 /// <summary>
 /// Command-side operations for authentication — pure DB writes only.
-/// Business logic (email uniqueness check, password hashing, JWT generation)
-/// belongs in the Application service layer, not here.
 /// </summary>
 public interface IAuthCommands
 {

@@ -4,7 +4,6 @@ using BookmarkManager.Application.Interfaces.Commands;
 using BookmarkManager.Application.Interfaces.Queries;
 using BookmarkManager.Application.Interfaces.Services;
 using BookmarkManager.Domain.Entities;
-using BookmarkManager.Domain.Interfaces;
 
 namespace BookmarkManager.Application.Services;
 

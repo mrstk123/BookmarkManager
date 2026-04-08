@@ -1,5 +1,6 @@
 using BookmarkManager.Domain.Entities;
 using BookmarkManager.Application.Interfaces.Commands;
+using BookmarkManager.Infrastructure.Connection;
 using Dapper;
 using Npgsql;
 

@@ -30,15 +30,16 @@ public class BookmarkController : ApiControllerBase
         return Ok(bookmark);
     }
 
-    // GET /api/bookmark/user/{userId}[?folderName=x][?tagName=y]
-    [HttpGet("user/{userId:int}")]
+    // GET /api/bookmark[?folderName=x][?tagName=y]
+    [HttpGet]
     public async Task<IActionResult> GetBookmarks(
-        int userId,
         [FromQuery] string? folderName,
         [FromQuery] string? tagName)
     {
-        var forbidden = EnforceOwnership(userId);
-        if (forbidden != null) return forbidden;
+        var userId = GetCurrentUserId();
+        // EnforceOwnership is needed only when userId comes from the client (e.g. path/query param).
+        // var forbidden = EnforceOwnership(userId);
+        // if (forbidden != null) return forbidden;
 
         if (!string.IsNullOrWhiteSpace(tagName))
             return Ok(await _bookmarkService.GetByTagAsync(userId, tagName));
@@ -49,12 +50,14 @@ public class BookmarkController : ApiControllerBase
         return Ok(await _bookmarkService.GetBookmarksByUserIdAsync(userId));
     }
 
-    // GET /api/bookmark/favorites/{userId}
-    [HttpGet("favorites/{userId:int}")]
-    public async Task<IActionResult> GetFavorites(int userId)
+    // GET /api/bookmark/favorites
+    [HttpGet("favorites")]
+    public async Task<IActionResult> GetFavorites()
     {
-        var forbidden = EnforceOwnership(userId);
-        if (forbidden != null) return forbidden;
+        var userId = GetCurrentUserId();
+        // EnforceOwnership is needed only when userId comes from the client (e.g. path/query param).
+        // var forbidden = EnforceOwnership(userId);
+        // if (forbidden != null) return forbidden;
 
         return Ok(await _bookmarkService.GetFavoritesByUserIdAsync(userId));
     }

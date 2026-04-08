@@ -1,7 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject, combineLatest, map, startWith, merge, scan } from 'rxjs';
-import { AuthService } from '../../../core/services/auth.service';
 import { SearchService } from '../../../core/services/search.service';
 import { Bookmark } from '../../../models/bookmark.model';
 import { BookmarksService } from '../../../core/services/bookmarks.service';
@@ -18,14 +17,12 @@ import { filterBookmarks } from '../../../shared/utils/filter.utils';
 export class BookmarksComponent implements OnInit {
     private bookmarksService = inject(BookmarksService);
     private searchService = inject(SearchService);
-    private authService = inject(AuthService);
 
     filteredBookmarks$!: Observable<Bookmark[]>;
     private toggledSubject = new Subject<Bookmark>();
 
     ngOnInit() {
-        const userId = this.authService.getUserId() ?? 0;
-        const bookmarks$ = this.bookmarksService.getBookmarks(userId);
+        const bookmarks$ = this.bookmarksService.getBookmarks();
         const search$ = this.searchService.searchQuery$.pipe(startWith(''));
 
         this.filteredBookmarks$ = combineLatest([

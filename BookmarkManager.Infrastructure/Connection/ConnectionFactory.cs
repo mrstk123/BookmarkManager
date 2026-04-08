@@ -6,8 +6,6 @@ using Npgsql;
 
 namespace BookmarkManager.Infrastructure.Connection;
 
-using BookmarkManager.Infrastructure;
-
 public class ConnectionFactory : IConnectionFactory
 {
     private readonly IConfiguration _configuration;

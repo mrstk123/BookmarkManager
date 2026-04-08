@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subject, combineLatest, map, startWith, switchMap, merge, scan } from 'rxjs';
-import { AuthService } from '../../../core/services/auth.service';
 import { BookmarksService } from '../../../core/services/bookmarks.service';
 import { SearchService } from '../../../core/services/search.service';
 import { Bookmark } from '../../../models/bookmark.model';
@@ -20,19 +19,17 @@ export class FolderBookmarksComponent implements OnInit {
   route = inject(ActivatedRoute);
   private bookmarksService = inject(BookmarksService);
   private searchService = inject(SearchService);
-  private authService = inject(AuthService);
 
   filteredBookmarks$!: Observable<Bookmark[]>;
   private toggledSubject = new Subject<Bookmark>();
 
   ngOnInit() {
-    const userId = this.authService.getUserId() ?? 0;
     const search$ = this.searchService.searchQuery$.pipe(startWith(''));
 
     this.filteredBookmarks$ = this.route.paramMap.pipe(
       switchMap(params => {
         const folderName = params.get('name') || '';
-        const bookmarks$ = this.bookmarksService.getBookmarksByFolder(userId, folderName);
+        const bookmarks$ = this.bookmarksService.getBookmarksByFolder(folderName);
         return combineLatest([
           merge(
             bookmarks$,

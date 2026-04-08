@@ -36,7 +36,7 @@ public class AuthService : IAuthService
         // Business rule: email must be unique
         var emailTaken = await _authQueries.EmailExistsAsync(request.Email);
         if (emailTaken)
-            throw new DomainException("Email is already taken.");
+            throw new BusinessRuleException("Email is already taken.");
 
         // Hash password before persisting
         var passwordHash = _passwordHasher.HashPassword(request.Password);
@@ -47,8 +47,7 @@ public class AuthService : IAuthService
             : request.UserName;
 
         // Delegate the raw insert to Infrastructure
-        var user = await _authCommands.CreateUserAsync(
-            userName, request.FullName, request.Email, passwordHash);
+        var user = await _authCommands.CreateUserAsync(userName, request.FullName, request.Email, passwordHash);
 
         // Generate JWT
         var token = _jwtTokenGenerator.GenerateToken(user);
@@ -69,7 +68,7 @@ public class AuthService : IAuthService
 
         // Use a single generic error to prevent user enumeration
         if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
-            throw new DomainException("Invalid credentials.");
+            throw new BusinessRuleException("Invalid credentials.");
 
         var token = _jwtTokenGenerator.GenerateToken(user);
 
@@ -106,7 +105,7 @@ public class AuthService : IAuthService
             ?? throw new KeyNotFoundException($"User {userId} not found.");
 
         if (!_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
-            throw new DomainException("Current password is incorrect.");
+            throw new BusinessRuleException("Current password is incorrect.");
 
         var newHash = _passwordHasher.HashPassword(request.NewPassword);
         await _authCommands.ChangePasswordAsync(userId, newHash);
